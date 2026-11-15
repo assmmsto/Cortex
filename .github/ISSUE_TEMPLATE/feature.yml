@@ -1,0 +1,28 @@
+name: طلب ميزة
+description: اقترح قدرة جديدة أو تحسيناً
+labels: [enhancement]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: المشكلة
+      description: ما الذي تعجز عن فعله اليوم؟ صف الحاجة لا الحل.
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: المقترح
+    validations:
+      required: true
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: بدائل جرّبتها أو فكّرت فيها
+  - type: checkboxes
+    id: constraints
+    attributes:
+      label: قيود المشروع
+      options:
+        - label: أعلم أن المشروع بلا اعتماديات وقت تشغيل، والمقترح لا يحتاج حزمة جديدة
+        - label: أعلم أن المشروع لا يحتفظ بطبقات توافق خلفي

@@ -1,0 +1,69 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  unit:
+    name: وحدة — node ${{ matrix.node }} على ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+        node: ['18.17', '20', '22']
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node }}
+      # لا اعتماديات وقت تشغيل؛ هذه للتحقق من سلامة الحزمة فقط.
+      - run: npm install --no-audit --no-fund
+      - run: node tests/run-suite.cjs
+
+  browser:
+    name: واجهة — أقسام المتصفح (Chrome)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - uses: browser-actions/setup-chrome@v1
+        id: chrome
+      - run: npm install --no-audit --no-fund
+      - run: node tests/browser/run.cjs
+        env:
+          CHROME_PATH: ${{ steps.chrome.outputs.chrome-path }}
+
+  package:
+    name: سلامة الحزمة (لا بيانات مستخدم ولا أسرار)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      # حارس أسرار (عطل مُقاس 2026-11-13): تقرير وكيل كُتب في docs/ حوى مفتاح
+      # API حقيقياً كاملاً، ثم التُزم — ولا أنماط .gitignore تمنع ذلك. الفحص هنا
+      # يمنع أي دفع يحمل مفتاحاً شبيهاً بمفاتيح المزودين (مع استثناء ملفات الاختبار
+      # التي تستعمل قيماً وهمية عمداً لاختبار الحجب).
+      - name: لا مفاتيح حقيقية في الملفات المتعقّبة
+        run: |
+          set -e
+          if git grep -n -I -E 'sk-[A-Za-z0-9]{20,}|sk-proj-[A-Za-z0-9_-]{20,}|ghp_[A-Za-z0-9]{20,}|AKIA[0-9A-Z]{16}' -- . ':(exclude)tests/*' ; then
+            echo "::error::وُجد نمط مفتاح في ملف متعقّب — أزله ودوّر المفتاح فوراً"; exit 1
+          fi
+          echo "لا أسرار في الملفات المتعقّبة"
+      # يفشل إن تسرّب vault/ أو data/ إلى الحزمة — حماية بيانات المستخدم.
+      - name: فحص أن الحزمة لا تحوي بيانات
+        run: |
+          npm pack --dry-run --json > pack.json
+          node -e "
+            const files = JSON.parse(require('fs').readFileSync('pack.json','utf8'))[0].files.map(f => f.path);
+            const bad = files.filter(p => /^(vault|data|\.perch|node_modules)\//.test(p));
+            if (bad.length) { console.error('تسرّبت ملفات محظورة:', bad.slice(0,10)); process.exit(1); }
+            console.log('الحزمة سليمة — ' + files.length + ' ملفاً بلا بيانات مستخدم');
+          "

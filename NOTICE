@@ -1,0 +1,56 @@
+# Third-Party Notices
+
+Cortex is distributed under the MIT License (see [LICENSE](LICENSE)).
+This file records the external work it draws on, as their licenses require.
+
+---
+
+## defuddle — `cortex-readability.js`
+
+The content-extraction heuristics in `cortex-readability.js` are derived from the
+design of **defuddle** (Kepano). The implementation in this repository is an
+independent rewrite using only the Node.js standard library — no defuddle code is
+vendored and no defuddle dependency is installed — but the scoring approach,
+content-entry-point selector order, negative/positive class-token lists, and the
+relax-then-retry strategy are adapted from it.
+
+- Project: https://github.com/kepano/defuddle
+- License: MIT
+- Copyright (c) Kepano
+
+The MIT permission notice for that work is reproduced below, as its terms require:
+
+```
+MIT License
+
+Copyright (c) Kepano
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+```
+
+---
+
+## Node.js built-ins
+
+Cortex has **no runtime npm dependencies**. It uses only Node.js built-in modules
+(`fs`, `http`, `crypto`, `zlib`, `node:sqlite`, `node:test`, …), which are covered
+by the Node.js license (MIT plus third-party components listed in that distribution).
+
+`electron` appears in `devDependencies` only, for the optional desktop wrapper
+(`npm run desktop:native`). It is not bundled or required at runtime.

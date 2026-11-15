@@ -1,0 +1,918 @@
+/* ============================================================
+   Cortex.os — الكربوني: مركز قيادة هندسي
+   جرافيت داكن كثيف • أركان حادة • مونوسبيس • لون كهرماني واحد
+   خصائص منطقية (RTL/LTR) + data-fz (حجم الخط) + data-accent (اللون)
+
+   يغطي هذا الملف كل صنف يستخدمه app.js فعلاً — لا كود ميت.
+   ============================================================ */
+:root{
+  --bg:#101318; --panel:#161a20; --panel2:#1b2027; --panel3:#21272f;
+  --line:#262c35; --line2:#303844;
+  /* --dim2 للنص الثانوي: كان #66707c ⇒ تباين 2.99:1 على --panel3 و3.25:1 على
+     --panel2 (دون WCAG AA 4.5:1) وهو مستعمل في 47 موضعاً بأحجام 9.5–12px.
+     القيمة الجديدة #8b95a1 محسوبة: 6.13/5.75/5.39/4.95 على bg/panel/panel2/panel3
+     (أدناها 4.95:1 ⇒ AA). لا تُخفَّض بلا إعادة حساب. */
+  --txt:#e8ecf1; --dim:#9aa5b1; --dim2:#8b95a1;
+  --amber:#e8b34b; --amber-dim:rgba(232,179,75,.13);
+  --teal:#4cc2b0; --red:#e06c75;
+  --mono:'JetBrains Mono','Cascadia Mono','Consolas',monospace;
+  --sans:'IBM Plex Sans Arabic','Space Grotesk','Segoe UI','Noto Sans Arabic',Tahoma,Arial,sans-serif;
+  --disp:'Space Grotesk','IBM Plex Sans Arabic',sans-serif;
+}
+html[data-accent="teal"]{--amber:#4cc2b0;--amber-dim:rgba(76,194,176,.13)}
+html[data-accent="violet"]{--amber:#a78bfa;--amber-dim:rgba(167,139,250,.13)}
+html[data-fz="s"]{zoom:.90;--fz:.90}
+html[data-fz="m"]{zoom:1;--fz:1}
+html[data-fz="l"]{zoom:1.1;--fz:1.1}
+html[data-fz="xl"]{zoom:1.22;--fz:1.22}
+html[lang="en"]{--sans:'Space Grotesk','IBM Plex Sans Arabic','Segoe UI',system-ui,sans-serif;}
+html{color-scheme:dark}
+input[type="number"]{-webkit-appearance:none;-moz-appearance:textfield;appearance:textfield}
+
+*{box-sizing:border-box}
+html,body{margin:0;height:100%}
+body{background:var(--bg);color:var(--txt);font-family:var(--sans);font-size:13.5px;line-height:1.7;font-weight:300;overflow:hidden}
+::selection{background:var(--amber-dim)}
+:focus-visible{outline:1px solid var(--amber);outline-offset:1px}
+button,input,select,textarea{font:inherit;color:inherit}
+a{color:var(--amber)}
+
+/* ── أدوات مساعدة ── */
+.hidden{display:none!important}
+.mono{font-family:var(--mono)}
+.dim{color:var(--dim)}
+.hint{color:var(--dim2);font-size:11px}
+.sm{font-size:12px}
+.row{display:flex;align-items:center;gap:8px}
+.gap{gap:8px}
+.grow{flex:1;min-width:0}
+.pad8{padding:8px 14px}
+.lbl{display:flex;flex-direction:column;gap:5px;font-size:11.5px;color:var(--dim);min-width:0;flex:1}
+.lbl span{font-size:11.5px;color:var(--dim)}
+.on{}
+.sec{color:var(--dim2);font-family:var(--mono);font-size:10.5px;letter-spacing:.08em;padding:4px 12px 2px}
+
+/* القيم الحقول: input/sel مشتركة */
+.input,.sel,.search{background:var(--panel2);border:1px solid var(--line);border-radius:3px;padding:5px 9px;color:var(--txt);outline:none;font-size:12.5px;min-width:0}
+.input::placeholder{color:var(--dim2)}
+.input:focus,.sel:focus,textarea:focus{border-color:var(--amber)}
+.sel{cursor:pointer}
+.input.sm,.sel.sm{padding:3px 7px;font-size:11.5px}
+
+/* ── الشبكة: شريط علوي + 3 أعمدة + شريط حالة ── */
+.app{display:grid;grid-template-rows:38px minmax(0,1fr) 26px;grid-template-columns:236px minmax(0,1fr);height:100vh}
+.app.ai-open{grid-template-columns:236px minmax(0,1fr) 324px}
+.topbar{grid-column:1/-1;display:flex;align-items:center;gap:12px;padding:0 12px;background:var(--panel);border-bottom:1px solid var(--line)}
+.statusbar{grid-column:1/-1;display:flex;gap:16px;align-items:center;background:var(--panel);border-top:1px solid var(--line);padding:0 12px;font-family:var(--mono);font-size:10.5px;color:var(--dim2)}
+.statusbar .ok{color:var(--teal)}
+
+/* ── الشريط العلوي ── */
+.brand{font-family:var(--disp);font-weight:700;letter-spacing:.02em;white-space:nowrap}
+.brand span{color:var(--amber)}
+.view-pills{display:flex;gap:2px;height:auto;flex:0 0 auto;margin-inline-start:0;border-bottom:1px solid var(--line)}
+.vpill{display:flex;align-items:center;padding:0 14px;background:none;border:none;border-top:2px solid transparent;color:var(--dim);cursor:pointer;font-size:12.5px}
+.vpill:hover{color:var(--txt)}
+.vpill.on{background:var(--bg);border-top-color:var(--amber);color:var(--txt)}
+.top-right{margin-inline-start:auto;display:flex;gap:8px;align-items:center}
+.icon-btn{background:var(--panel2);border:1px solid var(--line);border-radius:3px;color:var(--dim);padding:3px 10px;cursor:pointer;font-size:12px;font-family:var(--mono);min-height:24px;display:inline-flex;align-items:center;gap:5px}
+.icon-btn:hover{color:var(--txt);border-color:var(--line2)}
+.badge-n{background:var(--amber);color:#000;border-radius:2px;font-size:10px;padding:0 5px;margin-inline-start:4px;font-weight:500}
+
+/* ── الأزرار الموحّدة ── */
+.btn{background:var(--panel2);border:1px solid var(--line);border-radius:3px;color:var(--txt);padding:6px 13px;cursor:pointer;font-size:12px;min-height:28px;font-family:var(--sans)}
+.btn:hover{border-color:var(--line2);filter:brightness(1.12)}
+.btn.primary{background:var(--amber);border-color:var(--amber);color:#000;font-weight:600}
+.btn.primary:hover{filter:brightness(1.08)}
+.btn.ghost{background:none;border-color:var(--line2);color:var(--dim)}
+.btn.ghost:hover{color:var(--txt);border-color:var(--amber)}
+.btn.sm{padding:4px 10px;font-size:11.5px;min-height:24px}
+
+/* ── الشريط الجانبي: الشجرة ── */
+.sidebar{background:var(--panel);border-inline-end:1px solid var(--line);overflow:auto;padding:10px 0;display:flex;flex-direction:column;gap:12px;min-height:0}
+.side-block.grow{display:flex;flex-direction:column;min-height:0;flex:1}
+.resolver-row{display:flex;gap:6px}
+.resolver-row .input{flex:1;min-width:0}
+#resolver-result{padding:0 2px;margin-top:4px;min-height:15px}
+.minibtn{background:var(--panel2);border:1px solid var(--line);border-radius:3px;color:var(--dim);padding:4px 10px;cursor:pointer;font-size:11.5px;min-height:24px}
+.minibtn:hover{color:var(--txt);border-color:var(--line2)}
+.minibtn.full{display:block;width:100%;text-align:center;margin:0 0 6px}
+.tree{display:flex;flex-direction:column;min-height:0;overflow:auto}
+.tree-h{display:flex;justify-content:space-between;padding:7px 6px 2px;color:var(--dim2);font-family:var(--mono);font-size:10.5px;letter-spacing:.06em}
+.tree-i{display:flex;align-items:center;gap:7px;padding:3px 8px;cursor:pointer;color:var(--txt);font-size:12.5px;border-inline-start:2px solid transparent;min-height:24px;border-radius:2px}
+.tree-i:hover{background:var(--panel2)}
+.tree-i.active{background:var(--panel3);border-inline-start-color:var(--amber)}
+.tree-i .t{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.tree-i .n{margin-inline-start:auto;color:var(--dim2);font-family:var(--mono);font-size:10px}
+.dot{width:7px;height:7px;border-radius:1px;flex:none;background:var(--dim2)}
+.lib-shape{width:9px;height:9px;border-radius:2px;flex:none}
+.lib-shape.circle{border-radius:50%}
+.lib-shape.rect{border-radius:2px}
+.lib-shape.diamond{border-radius:2px;transform:rotate(45deg)}
+.lib-shape.octagon{border-radius:2px;transform:rotate(45deg)}
+.chips{display:flex;flex-wrap:wrap;gap:5px}
+.cchip{font-family:var(--mono);font-size:10.5px;color:var(--dim);background:var(--panel2);border:1px solid var(--line);border-radius:2px;padding:1px 7px;cursor:pointer}
+.cchip:hover{color:var(--amber);border-color:var(--amber)}
+.side-foot{margin-top:auto;padding-top:10px;border-top:1px solid var(--line);display:flex;flex-direction:column;position:sticky;bottom:-10px;background:var(--panel)}
+
+/* ── المحرر والمستند ── */
+.main{display:flex;flex-direction:column;min-width:0;min-height:0;background:var(--bg);overflow:hidden}
+.doc{display:flex;flex-direction:column;flex:1;min-height:0;overflow:hidden}
+.crumbs{padding:7px 16px;border-bottom:1px solid var(--line);font-size:10.5px;color:var(--dim2);display:flex;gap:6px;align-items:center;min-height:30px;font-family:var(--mono)}
+.crumbs .sep{color:var(--line2)}
+.doc-bar{display:flex;align-items:center;gap:10px;padding:6px 14px 10px;flex-wrap:wrap;border-bottom:1px solid var(--line)}
+.title-input{background:none;border:none;outline:none;color:var(--txt);font-family:var(--disp);font-size:1.3rem;font-weight:500;padding:6px 0;flex:1 1 240px;min-width:0}
+.title-input::placeholder{color:var(--dim2)}
+.actions{display:flex;align-items:center;gap:7px;flex-wrap:wrap}
+.editor-stack{display:grid;grid-template-columns:1fr;flex:1 1 0;min-height:0;overflow:hidden}
+.editor-stack.mode-split{grid-template-columns:1fr 1fr}
+.editor-textarea{width:100%;height:100%;resize:none;border:none;outline:none;background:none;color:var(--dim);padding:14px 18px;font-family:var(--mono);font-size:12px;line-height:1.9;white-space:pre-wrap}
+.editor-stack.mode-split .editor-textarea{border-inline-end:1px solid var(--line)}
+.pane-read{overflow:auto;padding:16px 22px;font-size:13.5px;line-height:1.9}
+.editor-stack.mode-split .pane-read{border-inline-start:1px solid var(--line)}
+
+/* ── المعاينة والمحتوى الماركداوني: موحّدة بين لوحة القراءة وفقاعات الوكيل ── */
+.pane-read,.md-block{font-size:13.5px;line-height:1.95;color:var(--txt)}
+.md-block{word-break:break-word}
+.pane-read h1,.md-block h1{font-family:var(--disp);font-size:1.45rem;margin:0 0 12px;color:var(--txt);letter-spacing:.2px}
+.pane-read h2,.md-block h2{font-family:var(--disp);font-size:1.02rem;color:var(--amber);margin:18px 0 8px;border-bottom:1px solid var(--line);padding-bottom:5px}
+.pane-read h3,.md-block h3{font-family:var(--disp);font-size:.95rem;color:var(--txt);margin:14px 0 6px}
+.pane-read h4,.md-block h4{font-family:var(--disp);font-size:.88rem;color:var(--dim);margin:12px 0 5px}
+.pane-read p,.md-block p{margin:0 0 10px}
+.pane-read ul,.md-block ul{margin:0 0 10px;padding:0;list-style:none}
+.pane-read li,.md-block li{padding:6px 11px;border:1px solid var(--line);border-radius:3px;margin:5px 0;background:var(--panel);display:flex;gap:10px;align-items:baseline}
+.pane-read code,.md-block code{font-family:var(--mono);font-size:.85em;background:var(--panel3);padding:1px 5px;border-radius:2px;color:var(--teal)}
+.pane-read pre,.md-block pre{background:#0c0f13;border:1px solid var(--line);padding:10px 12px;border-radius:3px;overflow:auto;margin:8px 0;font-family:var(--mono);font-size:11.5px;line-height:1.7}
+.pane-read pre code,.md-block pre code{background:none;padding:0;color:var(--txt)}
+.pane-read blockquote,.md-block blockquote{margin:8px 0;padding:7px 13px;border-inline-start:3px solid var(--amber);background:rgba(232,179,75,.06);border-radius:0 3px 3px 0;color:var(--txt)}
+.pane-read hr,.md-block hr{border:none;border-top:1px dashed var(--line);margin:14px 0}
+.pane-read em,.md-block em{color:var(--teal);font-style:italic}
+.pane-read strong,.md-block strong{color:var(--txt);font-weight:600}
+.mchip{font-family:var(--mono);font-size:.88em;color:var(--teal);background:rgba(76,194,176,.1);padding:0 4px;border-radius:2px}
+.wikilink{color:var(--amber);cursor:pointer;border-bottom:1px dotted var(--amber);padding:0 2px}
+.wikilink:hover{background:rgba(232,179,75,.12)}
+.md-table{width:100%;border-collapse:collapse;margin:10px 0;font-size:12px;font-family:var(--sans)}
+.md-table th,.md-table td{border:1px solid var(--line);padding:5px 9px;text-align:start;vertical-align:top;line-height:1.6}
+.md-table th{background:var(--panel2);color:var(--amber);font-family:var(--disp);font-weight:500;white-space:nowrap}
+.md-table tr:hover td{background:rgba(255,255,255,.02)}
+
+/* قائمة المهام داخل الماركداون */
+.task-list{list-style:none;padding:0;margin:0 0 10px}
+.task-item{list-style:none;border:1px solid var(--line);background:var(--panel);display:flex;align-items:baseline;gap:9px}
+.task-item.done{opacity:.5;text-decoration:line-through}
+.task-box{font-family:var(--mono);color:var(--teal);font-size:14px;flex:none}
+
+/* ── الرقائق والمراجع ── */
+.chip{display:inline-flex;align-items:center;gap:4px;font-family:var(--mono);font-size:10.5px;color:var(--dim);background:var(--panel2);border:1px solid var(--line);border-radius:2px;padding:1px 7px;white-space:nowrap}
+.chip.owner{color:var(--amber);border-color:rgba(232,179,75,.35)}
+.chip.due{color:var(--teal);border-color:rgba(76,194,176,.35)}
+.chip.done{color:var(--teal);border-color:rgba(76,194,176,.45)}
+.chip.overdue{color:var(--red);border-color:rgba(224,108,117,.5)}
+.ref{display:flex;align-items:center;gap:8px;padding:3px 4px;border-bottom:1px solid var(--panel2);cursor:pointer;color:var(--dim);font-size:12px}
+.ref:hover{color:var(--txt)}
+.ref:hover .t{color:var(--amber)}
+.ref .t{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.ref .n{color:var(--dim2);font-family:var(--mono);font-size:10px}
+.src{display:flex;flex-wrap:wrap;gap:5px;margin-top:6px}
+.src .ref{border-bottom:none;padding:0}
+.src .ref .t{font-family:var(--mono);font-size:10.5px;color:var(--amber);border-bottom:1px dotted var(--amber)}
+.src .ref:hover .t{background:rgba(232,179,75,.12)}
+
+/* ── الخارطة الحية: نظام FileMap يحمل أنماطه بنفسه (fm-*) — أُزيلت أنماط
+   محرك العقد الفيزيائي المحذوف (graph-pane/graphsvg/gnode/glegend) 2026-10-24 ── */
+#graph-info{display:flex;flex-wrap:wrap;align-items:center;gap:2px}
+
+/* ── لوحة الحالة الكاملة ── */
+.state-pane{flex:1;overflow:auto;padding:16px 22px;display:flex;flex-direction:column;gap:16px}
+.sp-head{display:flex;gap:26px;align-items:center;border-bottom:1px solid var(--line);padding-bottom:14px}
+.scorebox{flex:none}
+.sp-title{min-width:0}
+.bignum{font-family:var(--disp);font-size:2.6rem;font-weight:700;color:var(--teal);line-height:1}
+.bignum-sm{font-family:var(--disp);font-size:1.1rem;color:var(--txt);margin-top:6px;max-width:560px;white-space:pre-wrap}
+.sp-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}
+.sp-cell{background:var(--panel);border:1px solid var(--line);border-radius:3px;padding:10px 12px;font-size:12.5px;min-height:70px}
+.sp-cell .row{display:flex;justify-content:space-between;gap:10px;padding:3px 0;border-bottom:1px solid var(--panel2)}
+.sp-cell .dim{padding:3px 0}
+.sp-timeline .hbrow{display:flex;align-items:flex-end;gap:6px;flex-wrap:wrap;padding:6px 0}
+.hbrow{display:flex;align-items:flex-end;gap:6px;flex-wrap:wrap;min-height:40px}
+.hbwrap{display:flex;flex-direction:column;gap:3px;align-items:center}
+.hbwrap .bar{width:34px;background:var(--teal);border-radius:2px 2px 0 0;min-height:3px}
+.hbwrap .n{font-family:var(--mono);font-size:9.5px;color:var(--dim2)}
+.bar{background:var(--teal);border-radius:2px 2px 0 0}
+.barchart{display:flex;align-items:flex-end;gap:6px;flex-wrap:wrap}
+
+/* ── شريط السياق المصغر ── */
+.ctxbar{display:flex;gap:2px;border-top:1px solid var(--line);background:var(--panel);padding:0 8px;flex-wrap:wrap}
+.ctxb{background:none;border:none;border-top:2px solid transparent;color:var(--dim);padding:7px 12px;cursor:pointer;font-size:11.5px;font-family:var(--mono);min-height:26px}
+.ctxb:hover{color:var(--txt)}
+.ctxb.active{border-top-color:var(--amber);color:var(--amber)}
+.ctxb b{color:var(--dim2);font-weight:500}
+.ctxb.active b{color:var(--amber)}
+.ctx-panels{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:1px;background:var(--line);border-top:1px solid var(--line);max-height:210px;overflow:auto}
+.ctx-col{background:var(--panel);padding:8px 12px;font-size:11.5px;min-height:70px;min-width:0}
+.ctx-col .row{display:flex;justify-content:space-between;gap:8px;padding:3px 0;color:var(--dim);border-bottom:1px solid var(--panel2)}
+.ctx-col .frow{display:flex;justify-content:space-between;gap:8px;padding:3px 0;color:var(--dim);border-bottom:1px solid var(--panel2);cursor:pointer}
+.ctx-col .hint{padding:3px 0}
+.mini-btn{display:block;margin-top:8px;background:var(--panel2);border:1px solid var(--line);border-radius:3px;color:var(--dim);padding:4px 10px;cursor:pointer;font-size:11px;min-height:24px}
+.mini-btn:hover{color:var(--amber);border-color:var(--amber)}
+.rh{font-family:var(--mono);font-size:10px;color:var(--amber);letter-spacing:.06em;margin:8px 0 3px;text-transform:uppercase}
+.score-row{padding:3px 0;color:var(--dim);border-bottom:1px solid var(--panel2)}
+.score-row b{color:var(--txt)}
+.timeline{display:flex;flex-direction:column;gap:3px;margin:4px 0}
+.timeline .tline{display:flex;align-items:center;gap:7px;font-family:var(--mono);font-size:9.5px;color:var(--dim2)}
+.timeline .hbar{height:7px;background:var(--teal);border-radius:2px;flex:none;min-width:6px}
+.timeline .n{color:var(--dim2);white-space:nowrap}
+
+/* ── كونسول الوكيل ── */
+#app.ai-open .ai-panel{display:flex;flex-direction:column;min-height:0}
+.ai-panel{grid-column:3;grid-row:2;display:none;flex-direction:column;min-height:0;background:var(--panel);border-inline-start:1px solid var(--line);overflow:hidden;max-height:100%}
+.ai-panel:not(.hidden){display:flex}
+.agent-h{display:flex;align-items:center;gap:9px;padding:9px 12px;border-bottom:1px solid var(--line);font-family:var(--disp);font-weight:600;flex-wrap:wrap}
+.agent-h small{color:var(--dim2);font-family:var(--mono);font-weight:400;font-size:10px}
+.agent-h .icon-btn{margin-inline-start:0}
+.agent-h .icon-btn:last-child{margin-inline-start:auto}
+.agent-h .chip{margin-inline-start:auto}
+.agent-h .chip + .icon-btn{margin-inline-start:0}
+.ctxline{padding:5px 12px;border-bottom:1px solid var(--line);color:var(--dim2);font-size:10px;min-height:22px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.trace{flex:1;overflow:auto;padding:10px 12px;display:flex;flex-direction:column;gap:8px;min-height:80px}
+
+/* فقاعات الدردشة — تنسيقها مفقود بالكامل في الجيل السابق */
+.chat-bubble{max-width:100%;border:1px solid var(--line);border-radius:3px;padding:8px 11px;font-size:12.5px;line-height:1.85;word-break:break-word;background:var(--panel2);color:var(--txt)}
+.chat-bubble.ai{background:var(--panel3);border-inline-start:2px solid var(--amber)}
+.chat-bubble.user{background:var(--panel);border-inline-end:2px solid var(--teal);margin-inline-start:22px}
+.chat-bubble.system{background:none;border-style:dashed;border-color:var(--line2);color:var(--dim2);font-family:var(--mono);font-size:11px;padding:6px 10px;margin-inline-end:14px}
+.chat-bubble .md-block{font-size:12.5px;line-height:1.85}
+.chat-bubble .md-block h1,.chat-bubble .md-block h2,.chat-bubble .md-block h3{font-size:.95rem;margin:8px 0 5px}
+
+.tl{border:1px solid var(--line);border-radius:3px;padding:7px 10px;font-size:12.5px}
+.tl.step{border-inline-start:2px solid var(--teal);color:var(--dim);font-family:var(--mono);font-size:11px}
+.tl.done{border-inline-start:2px solid var(--amber);font-family:var(--disp);font-weight:500}
+.findings{padding:6px 12px;display:flex;flex-direction:column;gap:7px;max-height:32vh;overflow:auto}
+.findings:empty{display:none}
+.fc{border:1px solid var(--line);border-inline-start:2px solid var(--amber);border-radius:3px;padding:7px 10px;font-size:12px;color:var(--dim)}
+.fc .fk{font-family:var(--mono);font-size:10px;color:var(--amber);margin-bottom:2px}
+.review-card{border:1px solid var(--line);border-radius:3px;padding:7px 10px;font-size:12px;color:var(--dim);background:var(--panel2)}
+.review-card .rh{margin-top:0}
+.review-card.sev-high{border-inline-start:2px solid var(--red)}
+.review-card.sev-high .rh{color:var(--red)}
+.review-card.sev-medium{border-inline-start:2px solid var(--amber)}
+.review-card.sev-low{border-inline-start:2px solid var(--teal)}
+.review-card.sev-low .rh{color:var(--teal)}
+.goals{display:flex;flex-wrap:wrap;gap:5px;padding:8px 12px;border-top:1px solid var(--line)}
+.goal{background:var(--panel2);border:1px solid var(--line);border-radius:3px;color:var(--dim);padding:3px 9px;cursor:pointer;font-size:11px;min-height:24px}
+.goal:hover{color:var(--amber);border-color:var(--amber)}
+.compose{border-top:1px solid var(--line);padding:10px 12px;display:flex;flex-direction:column;gap:8px}
+.compose textarea{background:var(--panel2);border:1px solid var(--line);border-radius:3px;color:var(--txt);padding:8px 10px;outline:none;resize:none;font-size:12.5px;font-family:var(--sans)}
+.compose textarea:focus{border-color:var(--amber)}
+.send{background:var(--amber);color:#000;border:none;border-radius:3px;padding:7px;cursor:pointer;font-weight:600}
+.send:hover{filter:brightness(1.08)}
+.statusbar2{display:flex;justify-content:space-between;gap:8px;padding:6px 12px;border-top:1px solid var(--line);font-family:var(--mono);font-size:10px;color:var(--dim2)}
+
+/* ── الفارغ ── */
+.empty{margin:auto;text-align:center;display:flex;flex-direction:column;gap:12px;align-items:center;padding:40px}
+.empty-mark{font-family:var(--disp);font-size:3rem;color:var(--line2)}
+.empty h2{margin:0;font-family:var(--disp);font-size:1.3rem}
+.empty p{max-width:440px;color:var(--dim);margin:0}
+
+/* ── الطبقات العلوية والمودالات ── */
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,.55);display:flex;align-items:flex-start;justify-content:center;z-index:100}
+.modal-box{width:420px;margin-top:9vh;background:var(--panel);border:1px solid var(--line);border-radius:3px;padding:18px;display:flex;flex-direction:column;gap:13px;max-height:82vh;overflow:auto}
+.modal-box.wide{width:min(920px,94vw)}
+.modal-title{font-family:var(--disp);font-size:1.05rem;font-weight:600;border-bottom:1px solid var(--line);padding-bottom:10px}
+.modal-actions{display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap}
+.settings-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.card.soft{background:var(--panel2);border:1px solid var(--line);border-radius:3px;padding:14px;display:flex;flex-direction:column;gap:10px}
+.section-title{font-family:var(--disp);font-size:.92rem;font-weight:600;color:var(--txt);border-bottom:1px solid var(--line);padding-bottom:7px}
+.accent-section{grid-column:1/-1}
+.seg{display:flex;gap:2px;background:var(--panel3);border-radius:3px;padding:2px}
+.seg-b{flex:1;background:none;border:none;color:var(--dim);padding:5px 10px;cursor:pointer;font-size:12px;border-radius:2px;min-height:24px;white-space:nowrap}
+.seg-b:hover{color:var(--txt)}
+.seg-b.on{background:var(--amber-dim);color:var(--amber);box-shadow:inset 0 0 0 1px var(--amber)}
+.swatch{min-width:34px;flex:none}
+.swatch::before{content:'';display:inline-block;width:12px;height:12px;border-radius:2px;background:var(--amber);vertical-align:-2px}
+.seg .swatch[data-ui-accent="amber"]::before{background:#e8b34b}
+.seg .swatch[data-ui-accent="teal"]::before{background:#4cc2b0}
+.seg .swatch[data-ui-accent="violet"]::before{background:#a78bfa}
+.plain-pre{margin:0;white-space:pre-wrap;word-break:break-word;padding:10px;border-radius:3px;background:var(--panel2);border:1px solid var(--line);font-family:var(--mono);font-size:11px;color:var(--dim);direction:ltr;unicode-bidi:isolate;text-align:left}
+.tools-grid{display:flex;flex-wrap:wrap;gap:5px;max-height:220px;overflow:auto}
+.tg{font-family:var(--mono);font-size:10.5px;color:var(--dim);background:var(--panel2);border:1px solid var(--line);border-radius:2px;padding:2px 8px}
+.stack{display:flex;flex-direction:column;gap:2px;overflow:auto;max-height:50vh}
+.srow{display:flex;justify-content:space-between;gap:10px;padding:6px 4px;border-bottom:1px solid var(--panel2);font-size:12.5px}
+
+/* ⌘K */
+.palette{width:min(620px,94vw);margin-top:11vh;background:var(--panel);border:1px solid var(--line2);border-radius:3px;overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,.5)}
+.palette-input{width:100%;background:none;border:none;outline:none;color:var(--txt);padding:14px 16px;font-size:14px;border-bottom:1px solid var(--line);font-family:var(--mono)}
+.palette-results{max-height:47vh;overflow:auto;padding:5px}
+.pi{display:flex;align-items:center;gap:10px;padding:6px 11px;border-radius:2px;cursor:pointer;color:var(--txt)}
+.pi.sel{background:var(--panel3);box-shadow:inset 0 0 0 1px var(--line2)}
+.pi .t{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:12.5px}
+.pi .n{color:var(--dim2);font-family:var(--mono);font-size:10px}
+.empty-line{padding:14px;color:var(--dim2);text-align:center;font-size:12px}
+.palette-hint{padding:7px 14px;border-top:1px solid var(--line);color:var(--dim2);font-family:var(--mono);font-size:10px}
+
+/* ── إشعار عابر ── */
+.toast{position:fixed;inset-block-end:40px;inset-inline-start:50%;transform:translateX(-50%);background:var(--panel3);border:1px solid var(--line2);border-inline-start:3px solid var(--amber);border-radius:3px;color:var(--txt);padding:9px 16px;font-size:12.5px;z-index:200;box-shadow:0 12px 34px rgba(0,0,0,.55);max-width:80vw}
+
+/* ── أشرطة التمرير ── */
+::-webkit-scrollbar{width:8px;height:8px}
+::-webkit-scrollbar-thumb{background:var(--line);border-radius:0}
+::-webkit-scrollbar-thumb:hover{background:var(--line2)}
+::-webkit-scrollbar-track{background:transparent}
+
+/* ════════════════════════════════════════════════════════════
+   طبقة التصميم الجديد — قائمة أيقونية + 8 شاشات مستقلة
+   تُبنى فوق الأنماط السابقة دون حذف أي صنف يستخدمه app.js
+   ════════════════════════════════════════════════════════════ */
+
+/* شبكة التطبيق: علوي + (قائمة + عمل) + سفلي */
+.app{display:grid;grid-template-rows:38px minmax(0,1fr) 26px;grid-template-columns:64px minmax(0,1fr);height:100vh}
+.app.ai-open{grid-template-columns:64px minmax(0,1fr) 324px}
+
+/* ── القائمة الأيقونية ── */
+.rail{grid-row:2;display:flex;flex-direction:column;gap:2px;padding:6px 4px;background:var(--panel);border-inline-end:1px solid var(--line);overflow:auto}
+.rail-spacer{flex:1;min-height:8px}
+.rail-btn{background:none;border:none;border-radius:3px;color:var(--dim2);cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:2px;padding:7px 2px;min-height:48px;font-size:9.5px;position:relative;transition:background .12s,color .12s}
+.rail-btn:hover{background:var(--panel2);color:var(--txt)}
+.rail-btn.on{background:var(--panel3);color:var(--amber)}
+.rail-btn.on::before{content:'';position:absolute;inset-inline-start:-4px;inset-block:6px;width:2px;background:var(--amber);border-radius:0 2px 2px 0}
+.rail-ico{font-size:16px;line-height:1}
+.rail-lbl{font-family:var(--sans);white-space:nowrap;font-size:9.5px}
+.rail-btn.on .rail-ico{filter:drop-shadow(0 0 6px currentColor)}
+
+/* ── منطقة العمل والشاشات ── */
+.work{grid-row:2;overflow:hidden;display:flex;flex-direction:column;min-width:0;min-height:0;background:var(--bg)}
+.view{display:none;flex-direction:column;flex:1;min-height:0;overflow:hidden}
+.view.on{display:flex}
+.view-head{display:flex;align-items:center;gap:12px;padding:9px 16px;border-bottom:1px solid var(--line);background:var(--panel);flex-wrap:wrap}
+.view-title{margin:0;font-family:var(--disp);font-size:1.02rem;font-weight:600;letter-spacing:.2px}
+.view-tools{margin-inline-start:auto;display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.switch{display:inline-flex;align-items:center;gap:5px;font-size:11.5px;color:var(--dim);cursor:pointer;white-space:nowrap}
+.switch input{accent-color:var(--amber)}
+.count-chip{font-family:var(--mono);font-size:10.5px;color:var(--dim2);background:var(--panel2);border:1px solid var(--line);border-radius:2px;padding:1px 7px;white-space:nowrap}
+.banner{border:1px solid var(--line);border-inline-start:3px solid var(--amber);border-radius:3px;background:var(--panel2);padding:9px 13px;font-size:12.5px;color:var(--dim);margin:12px 16px;white-space:pre-wrap;word-break:break-word}
+.banner.ok{border-inline-start-color:var(--teal);color:var(--txt)}
+.banner.bad{border-inline-start-color:var(--red)}
+
+/* الشاشة ①: المعرفة — مستند + شريط جانبي */
+#view-notes{display:none}
+/* عمودان: المستند يتمدّد، والشريط ثابت العرض. صف واحد يملأ الارتفاع. */
+#view-notes.on{display:grid;grid-template-columns:minmax(0,1fr) 236px;grid-template-rows:auto minmax(0,1fr);flex:1;min-height:0;overflow:hidden}
+#view-notes .view-head{grid-row:1;grid-column:1/-1}
+#view-notes .doc{grid-row:2}
+#view-notes .sidebar{grid-row:2}
+#view-notes .empty{grid-row:2}
+#view-notes .sidebar{border-inline-end:none;border-inline-start:1px solid var(--line);grid-column:2}
+#view-notes .doc{grid-column:1;display:flex;flex-direction:column;min-height:0;overflow:hidden}
+#view-notes .doc.hidden{display:none}
+#view-notes .empty{grid-row:1;grid-column:1/-1}
+/* عند إخفاء المستند يبقى الشريط مكانه */
+#view-notes .doc.hidden ~ .sidebar{grid-column:1/-1}
+#view-notes:has(.doc.hidden) .sidebar{grid-column:1/-1}
+
+/* الشاشة ②: الخريطة */
+#view-graph{min-height:0}
+/* أنماط محرك العقد القديم أُزيلت مع المحرك (قرار 2026-10-24) */
+
+/* سطح الوكيل الواحد (توحيد 2026-10-27): كل التشغيل في اللوحة ✦ — لا شاشة وكيل ثانية.
+   نُقل تبويب الخلفية ومنتقي الوضع هنا، وحُذفت أنماط الشاشة المحذوفة (agent-grid/welcome/chat-form). */
+#agent-bg-pane{overflow:auto;padding:2px 0 10px}
+#agent-bg-pane .agent-sec{margin:10px 10px 0;flex:0 0 auto}
+#agent-bg-pane .sched-add{gap:6px}
+.compose .agent-mode{max-width:96px;align-self:flex-start}
+.ai-panel #team-live{padding:0 10px 6px}
+.ai-panel #team-summary{margin:0 10px 8px}
+.ai-panel .tcard{font-size:11px}
+.steps{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:4px;font-family:var(--mono);font-size:10.5px;color:var(--dim)}
+.steps li{padding:4px 8px;border:1px solid var(--line);border-inline-start:2px solid var(--teal);border-radius:2px;background:var(--panel2)}.steps li.ok{border-inline-start-color:var(--amber)}
+.steps li.bad{border-inline-start-color:var(--red)}
+
+/* الشاشة ④: المراقبة */
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;padding:14px 16px}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:3px;padding:11px 14px}
+.card-k{font-family:var(--mono);font-size:10.5px;color:var(--dim2);letter-spacing:.05em}
+.card-v{font-family:var(--disp);font-size:1.5rem;font-weight:600;margin-top:3px}
+.card-v.ok{color:var(--teal)}
+.card-v.bad{color:var(--red)}
+#view-monitor{overflow:auto}
+.table-wrap{overflow:auto;margin:0 16px 14px;border:1px solid var(--line);border-radius:3px}
+.table{width:100%;border-collapse:collapse;font-size:12px}
+.table th,.table td{border-bottom:1px solid var(--line);padding:7px 11px;text-align:start;vertical-align:top}
+.table th{background:var(--panel2);font-family:var(--disp);color:var(--amber);font-weight:500;white-space:nowrap;font-size:11.5px}
+.table tbody tr:hover{background:rgba(255,255,255,.02)}
+#mon-cards .card-v{font-size:1.35rem}
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:14px;padding:0 16px 14px}
+.two-col .sec{padding-inline:0}
+.sp-head,.sp-grid,.sp-timeline{padding:0 16px 14px}
+#view-monitor .stack{padding:0 16px 14px}
+
+/* الشاشة ⑤: المستودعات */
+.split2{flex:1;min-height:0;display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:1px;background:var(--line);overflow:auto}
+.split2 > div{background:var(--bg);padding:12px 14px;min-width:0;overflow:auto}
+#repo-files,#repo-deps,#impact-list{font-size:12px}
+#repo-files .tree-i{min-height:22px}
+
+/* الشاشة ⑥: المزودون */
+#view-providers{overflow:auto}
+#provider-list{padding:12px 16px 4px}
+#view-providers .card.soft{margin:0 16px 14px}
+.pcard{display:flex;align-items:center;gap:10px;padding:10px 13px;border:1px solid var(--line);border-radius:3px;background:var(--panel);margin-bottom:8px}
+.pcard .pname{font-family:var(--disp);font-weight:600;font-size:.95rem}
+.pcard .purl{font-family:var(--mono);font-size:10.5px;color:var(--dim2);word-break:break-all}
+.pcard .pkey{font-family:var(--mono);font-size:10px;color:var(--teal)}
+.pcard .pgrow{margin-inline-start:auto;display:flex;gap:6px;align-items:center;flex-wrap:wrap}
+/* اختيار النموذج داخل بطاقة المزود (انتقل من الإعدادات مع توحيد مكان المزوّدين) */
+.pcard{flex-wrap:wrap}
+.pcard .mchips{flex-basis:100%;display:flex;flex-wrap:wrap;gap:5px;margin-top:2px}
+.mchip{font:inherit;font-family:var(--mono);font-size:10.5px;color:var(--dim);background:transparent;
+  border:1px solid var(--line2);border-radius:999px;padding:3px 9px;cursor:pointer;
+  max-width:34ch;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;unicode-bidi:isolate}
+.mchip:hover,.mchip:focus-visible{border-color:var(--amber);color:var(--txt);outline:none}
+.mchip.on{border-color:var(--teal);color:var(--teal)}
+/* نموذج غير قابل للتوليد (طاقة مزود/مفتاح): يبقى مرئياً ليعرف المستخدم السبب،
+   لكنه غير قابل للنقر — بدل اختياره ثم فشل كل سؤال (2026-11-13). */
+.mchip.off{opacity:.55;border-style:dashed;cursor:not-allowed;color:var(--dim)}
+.mchip.off:hover{border-color:var(--line2);color:var(--dim)}
+/* قسم قابل للطيّ (2026-11-13): «إضافة مزود» كان ثابتاً يحجب القائمة */
+.sum-toggle{cursor:pointer;list-style:none;display:flex;align-items:center;justify-content:space-between;gap:8px;margin:0;user-select:none}
+.sum-toggle::-webkit-details-marker{display:none}
+.sum-toggle::after{content:'▾';color:var(--dim);font-size:.9em;transition:transform .15s ease}
+details[open]>.sum-toggle::after{transform:rotate(180deg)}
+.sum-toggle:hover,.sum-toggle:focus-visible{color:var(--txt);outline:none}
+details.card.soft>form{margin-top:10px}
+/* سطر المزود النشط في الإعدادات (قراءة فقط) */
+.active-line{font-size:.86rem;color:var(--dim);margin:2px 0 8px;unicode-bidi:isolate}
+.active-line b{color:var(--txt)}
+.active-line .k{color:var(--dim2)}
+.active-line .sep{color:var(--line2);margin:0 4px}
+
+/* الشاشة ⑦: الاستيراد */
+#view-import{overflow:auto}
+#view-import .card.soft{margin:0 16px 14px}
+#import-formats .card-v{font-size:.95rem;font-family:var(--mono)}
+/* كتالوج الصيغ المضغوط — كان ~50 بطاقة تملأ الشاشة (نقد بصرية 2026-10-24) */
+.import-catalog{margin-top:12px;border:1px solid var(--line);border-radius:4px;background:var(--panel);padding:8px 12px}
+.import-catalog summary{cursor:pointer;font-size:12.5px;color:var(--muted-foreground);user-select:none}
+.import-catalog summary:hover{color:var(--txt)}
+.fmt-chips{display:flex;flex-wrap:wrap;gap:6px;padding:10px 2px 4px}
+.fmt-chip{font-size:11px;color:var(--amber);border:1px solid var(--line);border-radius:999px;padding:2px 9px;background:var(--panel2)}
+
+/* تدقيق 2026-10-24: أوامر ومسارات الأدوات تُقرأ LTR داخل واجهة RTL */
+#mcp-servers .purl{direction:ltr;unicode-bidi:isolate;text-align:left;word-break:break-all}
+#mcp-servers .pkey{unicode-bidi:isolate}
+/* بطاقة دلالة أسفل شبكة الأدوات — كانت تترك 60% فراغاً بلا معنى */
+.tools-note{margin-top:14px;padding:12px 16px;border:1px dashed var(--line2);border-radius:4px;color:var(--dim);font-size:12px;line-height:1.8}
+/* أرقام ووحدات في RTL: عزل ثنائي الاتجاه حتى لا تنقلب (ث21.3 ← 21.3ث) */
+.card-v{unicode-bidi:isolate}
+.run-line{direction:ltr;unicode-bidi:isolate;text-align:right}
+
+/* شارة المسودات المعلقة في الشريط العلوي (قرار 2026-10-24) — ذهبية لأنها تنتظر قراراً */
+#ai-badge.draft-chip{border:1px solid var(--amber);color:var(--amber);background:var(--amber-dim);cursor:pointer}
+#ai-badge.draft-chip:hover{background:rgba(232,179,75,.22)}
+
+/* نافذة الجلسات المحسّنة: صفوف غنية + رسائل قابلة للفتح + متابعة */
+.sess-item{border:1px solid var(--line);border-radius:4px;padding:9px 12px;margin-bottom:8px;background:var(--panel)}
+.sess-item.active{border-color:var(--amber);background:var(--amber-dim)}
+.sess-head{display:flex;align-items:baseline;gap:8px;flex-wrap:wrap}
+.sess-head .t{font-weight:600}
+.sess-head .n{font-size:11px;color:var(--dim)}
+.sess-prev{font-size:11.5px;margin-top:5px;line-height:1.6}
+.sess-body{margin-top:8px;border-top:1px dashed var(--line);padding-top:7px;display:flex;flex-direction:column;gap:5px;max-height:260px;overflow:auto}
+.sess-msg{font-size:12px;line-height:1.6}
+.sess-msg .fk{color:var(--amber);font-size:10.5px;margin-inline-end:5px}
+.sess-actions{display:flex;gap:8px;margin-top:8px}
+
+/* نافذة MCP الموسّعة (2026-10-24): اختبار حي + تعليمات جاهزة + خادم خارجي */
+.modal-box.wide{max-width:820px;max-height:88vh;overflow:auto}
+/* عطل مُقاس 2026-11-06: القائمة كانت height:0 داخل عمود flex (انضغاط بلا min-height)، فتمرّ صفوفها خارج صندوق النافذة ويحجبها عنوان القسم التالي — زر «إلغاء الربط» غير قابل للنقر. */
+#mcp-external-list{min-height:120px;flex:0 0 auto}
+#mcp-external-list .ref{display:flex;justify-content:space-between;gap:10px;border:1px solid var(--line);border-radius:3px;padding:6px 10px;background:var(--panel)}
+#mcp-external-list .ref .n{color:var(--dim);font-size:11px;max-width:60%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+/* بطاقة خادم خارجي بحالة وزرّي فحص/إلغاء (2026-10-30) */
+.mcp-srow{display:flex;justify-content:space-between;gap:10px;align-items:center;flex-wrap:wrap}
+.mcp-srow-main{display:flex;flex-direction:column;gap:1px;min-width:0}
+.mcp-srow .n{max-width:420px}
+.mcp-srow-actions{display:flex;gap:6px;margin-inline-start:auto}
+.mcp-sst.ok{color:var(--teal)}
+.mcp-sst.bad{color:var(--red)}
+.mcp-sst.dim{color:var(--dim2)}
+
+/* الشاشة ⑧: الأدوات */
+#view-tools{overflow:auto}
+#mcp-servers{padding:12px 16px 4px}
+#view-tools .sec{padding-inline:16px}
+#mcp-tools-grid2{padding:0 16px 14px;max-height:none}
+
+/* ── الـomnibox في الشريط العلوي ── */
+.omnibox{margin-inline-start:16px;flex:1;max-width:520px;display:flex;align-items:center;gap:9px;background:var(--panel2);border:1px solid var(--line);border-radius:3px;color:var(--dim2);padding:5px 11px;cursor:pointer;font-size:12.5px;min-height:26px;font-family:var(--sans)}
+.omnibox:hover{border-color:var(--line2);color:var(--dim)}
+.omni-ico{font-size:13px}
+.omnibox kbd{margin-inline-start:auto;font-family:var(--mono);font-size:9.5px;background:var(--panel3);border:1px solid var(--line);border-radius:2px;padding:1px 5px;color:var(--dim2)}
+
+@media(max-width:1180px){#view-notes.on{grid-template-columns:minmax(0,1fr)}#view-notes .sidebar{display:none}}
+@media(max-width:980px){.split2{grid-template-columns:minmax(0,1fr)}.two-col{grid-template-columns:1fr}.app.ai-open{grid-template-columns:64px minmax(0,1fr) 300px}}
+
+
+/* إصلاح: شريط تبويبات المحرر كان يتمدد ويسحق منطقة التحرير */
+#editor-tabs{flex:0 0 auto;height:auto;padding:0 14px;background:var(--panel)}
+#editor-tabs .vpill{padding:6px 14px;border-top:none;border-bottom:2px solid transparent}
+#editor-tabs .vpill.on{border-bottom-color:var(--amber);background:none}
+#doc-bar{flex:0 0 auto}
+#note-meta-line{flex:0 0 auto}
+#ctxbar{flex:0 0 auto}
+#ctx-panels{flex:0 0 auto}
+.editor-stack{flex:1 1 0!important;min-height:0!important}
+
+/* لوحة الوكيل داخل الشبكة الجديدة: العمود الثالث، الصف الأوسط، بارتفاع كامل */
+.app.ai-open #ai-panel{display:flex;grid-column:3;grid-row:2;height:100%}
+.app:not(.ai-open) #ai-panel{display:none!important}
+#ai-panel .trace{flex:1;min-height:0}
+
+/* تبويبات لوحة الوكيل */
+.trace{overflow:auto;flex:1;min-height:120px;padding:10px 12px;display:flex;flex-direction:column;gap:7px}
+#ai-panel #agent-steps,#ai-panel #agent-sources{padding:10px 12px;overflow:auto;flex:1;min-height:0}
+#ai-panel #agent-steps li{margin-bottom:4px}
+/* (أُزيلت أنماط .agent-side و.team-box/.team-form مع شاشة الوكلاء — 2026-10-27) */
+
+/* ══ الفريق المتوازي: هدف واحد، أدوار تعمل معاً — يُبثّ في لوحة الوكيل ══ */
+.team-live{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:8px;min-height:0;max-height:34vh;overflow:auto}
+.tcard{border:1px solid var(--line);border-radius:3px;background:var(--panel2);padding:8px 10px;display:flex;flex-direction:column;gap:6px;transition:border-color .15s}
+.tcard.running{border-color:var(--amber);box-shadow:0 0 0 1px rgba(232,179,75,.25)}
+.tcard.done{border-inline-start:3px solid var(--teal)}
+.tcard.failed{border-inline-start:3px solid var(--red)}
+.tcard.has-ev{background:var(--panel3)}
+.tcard-h{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.trole{font-family:var(--disp);font-weight:600;font-size:12px;color:var(--amber)}
+.tst{font-family:var(--mono);font-size:10px;color:var(--dim2)}
+.tcard-body,.tcard-b{display:flex;flex-wrap:wrap;gap:4px;min-height:14px}
+.tchip{font-family:var(--mono);font-size:9.5px;color:var(--teal);background:rgba(76,194,176,.1);border:1px solid rgba(76,194,176,.3);border-radius:2px;padding:1px 5px}
+.terr{font-size:10.5px;color:var(--red);width:100%}
+.fc.sev-high{border-inline-start-color:var(--red)}
+.fc.sev-medium{border-inline-start-color:var(--amber)}
+.fc.sev-low{border-inline-start-color:var(--teal)}
+#view-monitor .fc .fk{font-family:var(--mono);font-size:10px;color:var(--amber)}
+
+/* ════════════════════════════════════════════════════════════
+   الشاشة ⑨: الحُكم — طقوس المراحل والبوابات والاستهلاك والحجر
+   كل الأصناف مشتقة من متغيرات الثيم — لا لون خلفي ثابت مفروض
+   ════════════════════════════════════════════════════════════ */
+#view-governance{overflow:hidden}
+.gov-scroll{flex:1;min-height:0;overflow:auto;padding:12px 16px 20px;display:flex;flex-direction:column;gap:12px}
+.gov-card{margin:0;gap:8px}
+/* تبويبات الحُكم (2026-11-06): تنقّل داخلي بدل 9 بطاقات في عمود واحد.
+   overflow-x:auto يمنع أي تجاوز أفقي على 375px (كان 0 ويجب أن يبقى 0). */
+.gov-tabs{margin:8px 16px 0;flex:none;overflow-x:auto}
+.gov-tabs .seg-b{font-size:12px;padding:6px 12px;white-space:nowrap}
+.gov-line{flex-wrap:wrap;gap:8px;align-items:center}
+.gov-num{font-size:.95rem;color:var(--txt)}
+
+.gov-list{display:flex;flex-direction:column;gap:4px;min-width:0}
+.gov-row{display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:6px 10px;border:1px solid var(--line);
+  border-inline-start:2px solid var(--line2);border-radius:3px;background:var(--panel2);font-size:12.5px;min-width:0}
+.gov-row.ok{border-inline-start-color:var(--teal)}
+.gov-row.bad{border-inline-start-color:var(--red)}
+.gov-row.locked{border-inline-start-color:var(--dim2)}
+.gov-row.sev-high,.gov-row.sev-critical{border-inline-start-color:var(--red)}
+.gov-row.sev-medium{border-inline-start-color:var(--amber)}
+.gov-row.sev-low{border-inline-start-color:var(--teal)}
+.gov-n{font-family:var(--mono);font-size:11px;color:var(--dim2);min-width:16px;text-align:center;flex:none}
+.gov-name{font-size:12.5px;color:var(--txt);min-width:0}
+.gov-key{font-size:10px}
+.gov-detail{flex:1;min-width:120px;overflow-wrap:anywhere}
+.gov-err{color:var(--red)}
+.gov-why{margin-inline-start:auto}
+
+/* الشارات: نجاح/فشل/تحذير/مقفلة — نصية دائماً لا لون فقط */
+.gov-badge{font-family:var(--mono);font-size:10px;border-radius:2px;padding:1px 7px;border:1px solid var(--line2);
+  color:var(--dim);background:var(--panel3);white-space:nowrap;flex:none}
+.gov-badge-ok{color:#101318;background:var(--teal);border-color:var(--teal);font-weight:600}
+.gov-badge-bad{color:#101318;background:var(--red);border-color:var(--red);font-weight:600}
+.gov-badge-warn{color:#101318;background:var(--amber);border-color:var(--amber);font-weight:600}
+.gov-badge-idle{color:var(--dim2)}
+.gov-badge-locked{color:var(--dim2);border-color:var(--line)}
+
+.gov-metrics{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:8px}
+.gov-cell{padding:8px 11px}
+.gov-cell .card-v{font-size:1.15rem;word-break:break-word}
+
+.gov-note,.gov-notice{font-size:12px;color:var(--dim);line-height:1.85;white-space:pre-wrap;word-break:break-word;
+  background:var(--panel2);border:1px solid var(--line);border-inline-start:2px solid var(--amber);border-radius:3px;padding:8px 11px}
+
+.gov-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:5px}
+.gov-kind{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:5px 9px;
+  border:1px solid var(--line);border-radius:3px;background:var(--panel2);font-size:12px;min-width:0}
+/* قصّ نظيف بدل خروج النص عن البطاقة (مقيس 2026-11-14: «متعارض مع contradicts»
+   كان يتجاوز حدوده في شبكة 9 أنواع). الاسم يتمدّد ويُقصّ، والشارة ثابتة. */
+.gov-kind .gov-name{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.gov-kind .gov-badge{flex:0 0 auto}
+.gov-kind.ok{border-inline-start:2px solid var(--teal)}
+.gov-kind.bad{border-inline-start:2px solid var(--red)}
+.gov-kind.idle{border-inline-start:2px solid var(--dim2)}
+
+.gov-steps{display:flex;flex-wrap:wrap;gap:5px}
+.gov-step{font-family:var(--mono);font-size:10.5px;color:var(--dim);background:var(--panel2);border:1px solid var(--line);
+  border-inline-start:2px solid var(--teal);border-radius:2px;padding:2px 7px}
+.gov-step.bad{border-inline-start-color:var(--red);color:var(--txt)}
+
+.gov-q-reason{flex:1 1 190px;min-width:120px}
+.gov-q-reason.req{border-color:var(--red)!important;box-shadow:inset 0 0 0 1px var(--red)}
+
+/* ── §60/§40: درجة الثقة والمصدر مع كل علاقة داخل تفاصيل العنصر ── */
+.cfr{display:flex;flex-direction:column;gap:2px;padding:5px 6px;border:1px solid var(--line);
+  border-inline-start:2px solid var(--amber);border-radius:3px;background:var(--panel2);cursor:pointer}
+.cfr:hover{border-color:var(--line2)}
+.cfr-top{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.cfr-top .t{font-size:12px;color:var(--txt);min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.cfr-meta{display:flex;align-items:center;gap:5px;flex-wrap:wrap;font-size:10px}
+.cfr-sum{font-size:10px;color:var(--dim2);padding:2px 0 4px}
+.bayn-wrap{display:inline;border-bottom:1px dashed var(--amber)}
+.conf-warn{font-family:var(--mono);font-size:9.5px;color:var(--red);border:1px solid var(--red);
+  border-radius:2px;padding:0 5px;background:rgba(224,108,117,.10);white-space:nowrap}
+.chip{font-family:var(--mono);font-size:9.5px;color:var(--dim);background:var(--panel3);border:1px solid var(--line);
+  border-radius:2px;padding:0 5px;white-space:nowrap}
+.chip.conf.low{color:var(--red);border-color:var(--red)}
+.chip.conf.high{color:var(--teal);border-color:rgba(76,194,176,.5)}
+.chip.kind{color:var(--amber);border-color:rgba(232,179,75,.5)}
+.chip.done{color:var(--teal)}
+.chip.owner,.chip.due{color:var(--dim2)}
+
+/* عمود إضافي: ستة أعمدة في شريط السياق */
+.ctx-panels{grid-template-columns:repeat(6,minmax(0,1fr))}
+@media(max-width:980px){.ctx-panels{grid-template-columns:repeat(3,minmax(0,1fr))}}
+
+
+/* قوالب الوكيل الجاهزة (قرار دورة الأدوار) */
+.chips-row{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0}
+.chips-row .chip{cursor:pointer;border:1px solid var(--border);border-radius:999px;padding:4px 12px;background:transparent;color:inherit;font:inherit}
+.chips-row .chip:hover{border-color:var(--accent);color:var(--accent)}
+
+
+/* ═══ لوحة تعريف العنصر أُزيلت مع محرك العقد (قرار 2026-10-24) —
+   نظام FileMap يقدّم العلاقات في العمودين مباشرة، بلا لوحة منبثقة ═══ */
+
+
+/* ═══ لوحة الوكيل: رسائل تتمدّد + إدخال ملتصق أسفل دائماً (قرار دورة الأدوار) ═══ */
+.ai-panel{display:flex; flex-direction:column; min-height:0}
+#chat-messages{flex:1 1 auto; min-height:0; overflow:auto}
+.agent-panes{flex:0 0 auto; max-height:38%; overflow:auto}
+.agent-panes[hidden]{display:none}
+
+/* شريط الخطوة التالية — زر فعلي لا نص مدفون */
+.next-action{flex:0 0 auto; padding:6px 10px}
+.next-action.hidden{display:none}
+.next-btn{
+  width:100%; display:flex; align-items:center; gap:8px; cursor:pointer; text-align:start;
+  background:linear-gradient(90deg, color-mix(in srgb, var(--accent) 16%, transparent), transparent);
+  border:1px solid var(--accent); border-radius:10px; padding:8px 11px;
+  color:var(--foreground); font:inherit;
+}
+.next-btn:hover{background:color-mix(in srgb, var(--accent) 24%, transparent)}
+.na-label{font-size:11px; opacity:.75; white-space:nowrap; flex:0 0 auto}
+.na-text{font-size:12.5px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
+
+/* الرسائل: فقاعات أوضح وأوسع قراءة */
+.chat-bubble{max-width:100%; line-height:1.75}
+.chat-bubble.user{align-self:flex-end; margin-inline-start:auto}
+
+
+/* شريحة الأهمية في صفوف المكتبة (قرار دورة الأدوار: المعرفة) */
+.imp-mark{font-size:9px; line-height:1; flex:0 0 auto; margin-inline-end:2px}
+.imp-mark.s-2{color:#e06c75}
+.imp-mark.s-1{color:#e8b34b}
+
+/* ═══ تخطيط الشريط الجانبي (عطل 2026-10-20 مُقاس حيّاً) ═══
+   القياس الفعلي: قسم «المشاريع» كان يأخذ 596px من 789 ويبتلع الشريط، فصار
+   #library-list بارتفاع 0 وقسم «أقوى الكيانات» يخرج تحت الحد (bottom 983 > 874)
+   ويغطّي صفوف المكتبة ⇒ Playwright: «subtree intercepts pointer events»، أي أن
+   المكتبة **غير قابلة للنقر** في المتصفح الحقيقي — عطل منتج لا عطل اختبار.
+   القاعدة: قسم المشاريع والمكتبة يتقاسمان المساحة (المكتبة الأكبر)، والكيانات
+   تأخذ ارتفاعها الطبيعي، والـ overflow داخل القسم نفسه لا خارجه. */
+.sidebar{min-height:0}
+.side-block{display:flex;flex-direction:column;min-height:0;padding:0 10px;flex:0 0 auto}
+.side-block > .sec{flex:0 0 auto}
+/* المشاريع: مساحة مرنة بحد أدنى/أقصى معقول */
+.side-block:has(> #projects-list){flex:1 1 40%;min-height:70px}
+/* المكتبة (grow): الأكبر — تأخذ النصيب الأوفر */
+.side-block.grow{flex:1 1 60%;min-height:90px}
+.side-block .tree{flex:1 1 auto;min-height:0;overflow:auto}
+.side-block:has(> #entities-list){flex:0 0 auto;max-height:26%}
+.side-block .chips{flex:0 0 auto;overflow:auto;max-height:100%}
+
+/* ════════════════════════════════════════════════════════════════
+   2026-10-27 — «إضافة مصدر» + «ربط ذكي» + أقسام شاشة الوكلاء + لوحة ⌘K
+   (قرارا المستخدم: ＋ جديدة = إضافة مصدر · ＋ ربط = ربط ذكي)
+   ════════════════════════════════════════════════════════════════ */
+
+/* ── نافذة إضافة المصدر: أربعة تبويبات، كل تبويب لوحة مستقلة ── */
+.src-tabs{margin:2px 0}
+.src-panel{display:flex;flex-direction:column;gap:9px;min-width:0}
+.src-panel.hidden{display:none}
+#src-preview-out:empty{display:none}
+.preview-head{align-items:center;flex-wrap:wrap;gap:6px}
+.preview-head .lbl{flex:0 0 auto;min-width:0}
+.src-table{margin:0;max-height:34vh}
+.src-table .table th,.src-table .table td{padding:5px 9px;font-size:11.5px}
+.src-table .table td:first-child{word-break:break-all}
+#src-folder-result,#src-path-result,#src-url-result{margin:0}
+
+/* ── نافذة الربط الذكي: اختيار ⇒ اقتراحات بشريط ثقة ⇒ اعتماد ── */
+.link-pick{max-height:24vh;border:1px solid var(--line);border-radius:3px;background:var(--panel2)}
+.link-suggest{max-height:38vh;gap:7px}
+.sugg{border:1px solid var(--line);border-inline-start:2px solid var(--teal);border-radius:3px;background:var(--panel2);
+  padding:8px 10px;display:flex;flex-direction:column;gap:6px;min-width:0}
+.sugg.low{border-inline-start-color:var(--amber)}
+.sugg-head{display:flex;align-items:baseline;gap:8px;cursor:pointer;min-width:0}
+.sugg-head input{accent-color:var(--amber);flex:0 0 auto}
+.sugg-head .t{font-size:12.5px;color:var(--txt);min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.sugg-meta{display:flex;align-items:center;gap:7px;flex-wrap:wrap}
+.confbar{display:inline-block;width:110px;height:6px;border-radius:3px;background:var(--panel3);
+  border:1px solid var(--line);overflow:hidden;flex:0 0 auto}
+.confbar i{display:block;height:100%;background:var(--teal)}
+.sugg.low .confbar i{background:var(--amber)}
+.sugg-reason{font-size:11px;color:var(--dim2);line-height:1.7}
+#link-approve-summary{margin:0}
+
+/* ── المجدول + النبضات — تُعرض الآن داخل تبويب «الخلفية» في لوحة الوكيل (والشاشة حُذفت) ── */
+.agent-sec{margin:12px 16px 0;flex:0 0 auto}
+.agent-sec:last-of-type{margin-bottom:16px}
+.agent-sec .section-title{display:flex;align-items:center;gap:9px;flex-wrap:wrap}
+.agent-sec .section-title .btn{margin-inline-start:auto}
+.sched-add{align-items:flex-end;gap:8px;flex-wrap:wrap}
+.sched-every{flex:0 0 110px}
+.sched-row{border:1px solid var(--line);border-inline-start:2px solid var(--teal);border-radius:3px;
+  background:var(--panel2);padding:8px 10px;display:flex;flex-direction:column;gap:6px}
+.sched-row.off{border-inline-start-color:var(--dim2);opacity:.62}
+.sched-top{display:flex;align-items:baseline;gap:8px;min-width:0}
+.sched-top .t{font-size:12.5px;color:var(--txt);min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.sched-meta{display:flex;align-items:center;gap:5px;flex-wrap:wrap}
+.sched-acts{flex-wrap:wrap}
+.tick-row{display:flex;align-items:center;gap:6px;flex-wrap:wrap;border:1px solid var(--line);
+  border-radius:3px;background:var(--panel2);padding:5px 9px}
+.tick-bits{font-size:10.5px;color:var(--dim)}
+.tick-err{font-size:11px;color:var(--red)}
+.warn-row td{border-inline-start:2px solid var(--amber)}
+.hint.ok{color:var(--teal)}
+.hint.bad{color:var(--red)}
+.hint.warn{color:var(--amber);padding-top:6px}
+#skills-list .table-wrap{margin:0}
+
+/* ── لوحة ⌘K: التثبيت + قسم «مثبتة» ── */
+.pi-group{font-family:var(--mono);font-size:9.5px;letter-spacing:.08em;color:var(--dim2);padding:6px 11px 3px}
+.pi-star{background:none;border:none;color:var(--dim2);cursor:pointer;font-size:13px;line-height:1;
+  padding:2px 4px;flex:0 0 auto;border-radius:2px}
+.pi-star:hover{color:var(--amber);background:var(--panel3)}
+.pi-star.on{color:var(--amber)}
+
+/* ═══════════ الاستوديو (W1-W5): الحالة الحيّة · الخط الزمني · المخرَجات · عقد الصلاحيات ═══════════ */
+/* الحالة الحيّة: ماذا يعمل الآن — دائماً ظاهرة بلا نقر */
+.agent-live{display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding:6px 10px;border-bottom:1px solid var(--line);
+  background:var(--panel2);font-family:var(--mono);font-size:10.5px;color:var(--dim)}
+.agent-live .al-goal{color:var(--txt);max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.agent-live .al-step{color:var(--amber)}
+.agent-live .al-cancel{margin-inline-start:auto}
+.agent-live.working{border-bottom-color:var(--amber)}
+.agent-live .dot{width:7px;height:7px;border-radius:50%;background:var(--amber);animation:alPulse 1.2s infinite}
+@keyframes alPulse{0%,100%{opacity:1}50%{opacity:.25}}
+/* الخط الزمني: بطاقات أحداث مهيكلة بدل فقاعات */
+.tl-item{margin:6px 10px}
+.tl-user{background:var(--panel3);border:1px solid var(--line);border-radius:3px;padding:7px 10px;font-size:12.5px;color:var(--txt)}
+.tl-thought{font-family:var(--mono);font-size:10.5px;color:var(--dim2)}
+.tl-thought summary{cursor:pointer;color:var(--dim)}
+.tl-thought .body{padding:5px 8px;white-space:pre-wrap}
+.tl-tool{border:1px solid var(--line);border-inline-start:2px solid var(--teal);border-radius:3px;background:var(--panel2);padding:6px 9px;font-size:11.5px}
+.tl-tool .head{display:flex;gap:7px;align-items:center;font-family:var(--mono);font-size:10.5px}
+.tl-tool .head .tname{color:var(--teal);font-weight:600}
+.tl-tool .head .tstep{color:var(--dim2)}
+.tl-tool details{margin-top:4px}
+.tl-tool details summary{cursor:pointer;color:var(--dim);font-family:var(--mono);font-size:10px}
+.tl-tool details .args{white-space:pre-wrap;font-family:var(--mono);font-size:10px;color:var(--dim2);padding:4px 6px}
+.tl-obs{margin-top:4px;font-family:var(--mono);font-size:10px;color:var(--dim)}
+.tl-obs.ok::before{content:'✓ ';color:var(--teal)}
+.tl-obs.bad::before{content:'✗ ';color:var(--red)}
+.tl-approval{border:1px solid var(--amber);border-radius:3px;background:var(--panel2);padding:7px 9px;font-size:11.5px}
+.tl-approval .fk{font-family:var(--mono);font-size:10px;color:var(--amber);margin-bottom:3px}
+.tl-note{font-family:var(--mono);font-size:10.5px;color:var(--amber);padding:2px 4px}
+.tl-note.ok{color:var(--teal)}
+.tl-note.bad{color:var(--red)}
+.tl-answer{border:1px solid var(--line);border-inline-start:2px solid var(--amber);border-radius:3px;background:var(--panel);padding:9px 11px;white-space:pre-wrap;font-size:12.5px;color:var(--txt)}
+.tl-badge{display:inline-block;margin-top:6px;margin-inline-end:6px;font-family:var(--mono);font-size:9.5px;padding:1px 7px;border-radius:8px;border:1px solid var(--line);color:var(--dim)}
+.tl-badge.ok{color:var(--teal);border-color:var(--teal)}
+.tl-badge.bad{color:var(--red);border-color:var(--red)}
+.tl-cancel{font-size:12px;color:var(--dim);border:1px dashed var(--line);border-radius:3px;padding:7px 10px}
+.tl-fail{border:1px solid var(--red);border-radius:3px;padding:7px 10px;font-size:12px;color:var(--red);background:var(--panel2)}
+/* بطاقة المخرَج: التقرير يعيش في المعرفة، والشات يعرض البطاقة */
+.tl-artifact{display:flex;align-items:center;gap:8px;border:1px solid var(--teal);border-radius:3px;background:var(--panel2);padding:7px 10px;font-size:12px}
+.tl-artifact .ic{font-size:15px}
+.tl-artifact .meta{font-family:var(--mono);font-size:10px;color:var(--dim)}
+.tl-artifact button{margin-inline-start:auto}
+/* لوحة العقد (W5): درج جانبي فوق كل شيء */
+.drawer{position:fixed;top:0;inset-inline-end:0;height:100vh;width:min(460px,92vw);background:var(--panel);
+  border-inline-start:1px solid var(--line);z-index:60;display:flex;flex-direction:column;box-shadow:0 0 24px rgba(0,0,0,.45)}
+.drawer-h{display:flex;align-items:center;justify-content:space-between;padding:10px 14px;border-bottom:1px solid var(--line);
+  font-family:var(--display,var(--disp));font-weight:600;font-size:14px}
+.drawer-b{flex:1;overflow:auto;padding:12px 14px}
+.contract-sec{margin-bottom:16px}
+.contract-sec h4{margin:0 0 8px;font-family:var(--mono);font-size:10.5px;letter-spacing:.08em;color:var(--dim2);font-weight:600}
+.contract-row{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin:6px 0;font-size:12px}
+.contract-row .lbl{min-width:70px;font-family:var(--mono);font-size:10.5px;color:var(--dim)}
+.contract-row input[type="number"]{width:96px}
+.contract-table{width:100%;border-collapse:collapse;font-size:11px}
+.contract-table th{font-family:var(--mono);font-size:9.5px;color:var(--dim2);text-align:start;padding:4px 6px;border-bottom:1px solid var(--line)}
+.contract-table td{padding:4px 6px;border-bottom:1px solid var(--panel3);vertical-align:top}
+.contract-table td.mono{font-family:var(--mono);font-size:10px;color:var(--dim)}
+.contract-note{font-size:10.5px;color:var(--dim2);line-height:1.6}
+.seg{display:flex;gap:0;border:1px solid var(--line);border-radius:3px;overflow:hidden}
+.seg button{background:var(--panel2);border:none;color:var(--dim);padding:5px 11px;font-size:11.5px;cursor:pointer;font-family:var(--sans)}
+.seg button.on{background:var(--amber);color:#181818;font-weight:600}
+
+/* عارض الملفات (2026-10-29): قراءة فقط — نص خام مع لفّ الأسطر الطويلة */
+.file-view{margin:0;font-size:12px;line-height:1.55;white-space:pre-wrap;word-break:break-word}
+.tv-file-path{font-size:12px;direction:ltr;max-width:78%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.vf-btn{padding:2px 7px;min-height:20px;font-size:11px}
+
+/* ── توافق الشاشات الصغيرة (2026-11-06) ─────────────────────────────────
+   القياس: عند 390px كان التمرير الأفقي 216px لأن الشبكة ثلاثية الأعمدة ثابتة
+   (236px + محتوى + 324px). دون 900px يصبح التخطيط عموداً واحداً قابلاً للتمرير. */
+@media (max-width:900px){
+  .app{grid-template-columns:minmax(0,1fr);grid-template-rows:auto auto minmax(0,1fr) auto;height:auto;min-height:100vh}
+  .app.ai-open{grid-template-columns:minmax(0,1fr)}
+  .topbar,.statusbar,.work,.rail{min-width:0}
+  .topbar{flex-wrap:wrap;height:auto;padding:6px 8px;row-gap:4px}
+  .top-right{flex-wrap:wrap;margin-inline-start:0;min-width:0}
+  .omnibox{min-width:0;flex:1 1 130px;margin-inline-start:0;max-width:none}
+  .rail{grid-row:2;flex-direction:row;overflow-x:auto;border-inline-end:none;border-bottom:1px solid var(--line);max-height:none}
+  .rail .nav-lbl{display:none}
+  .work{grid-row:3;overflow:visible}
+  .ai-panel{grid-column:1;grid-row:4;max-height:60vh}
+  .sp-grid,.settings-grid,.ctx-panels{grid-template-columns:1fr}
+  .statusbar{grid-column:1/-1;flex-wrap:wrap;height:auto;padding:4px 8px;row-gap:2px}
+  .editor-textarea{font-size:12px}
+}
+/* ── إمكانية الوصول: رابط التخطي، النص لقارئ الشاشة، حلقة التركيز ── */
+.skip-link {
+  position: fixed; inset-block-start: 8px; inset-inline-start: 8px; z-index: 999;
+  padding: 10px 16px; border-radius: 10px;
+  background: var(--panel, #14161c); color: var(--text, #e8eaf0);
+  border: 1px solid var(--line, #2a2f3a); text-decoration: none; font-weight: 600;
+  transform: translateY(-200%);
+}
+/* :focus لا :focus-visible وحده — التركيز البرمجي لا يُطلق focus-visible في Chromium،
+   ورابط التخطي يجب أن يظهر بأي طريقة وصل إليه التركيز. */
+.skip-link:focus,
+.skip-link:focus-visible { transform: translateY(0); }
+.sr-only {
+  position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
+  overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0;
+}
+:where(button, a, input, textarea, select, [tabindex]):focus-visible {
+  outline: 2px solid var(--accent, #6ea8fe); outline-offset: 2px;
+}
+
+/* شارة نوع المعرفة (المادة 6): تمييز هادئ — المستنتج ليس معتمداً */
+.chip.kk{font-size:10px;padding:1px 6px;border-radius:2px;border:1px solid var(--line2);white-space:nowrap}
+.chip.kk-imported{color:var(--dim)}
+.chip.kk-decided{color:var(--teal);border-color:var(--teal)}
+.chip.kk-inferred{color:var(--amber);border-color:var(--amber-dim)}
+.chip.kk-hypothesis{color:var(--red);border-color:var(--red)}
+.chip.kk.src{color:var(--dim)}
+#note-meta-line .sep{color:var(--line2);margin:0 6px}
+
+/* ═══════════ تصحيح vh تحت zoom (عطل مُقاس 2026-11-08) ═══════════
+   `zoom` يضخّم وحدات العرض/الارتفاع أيضاً، فـ100vh عند حجم L تصير 110% من الشاشة
+   وعند XL 122% ⇒ .app و.modal-box يتجاوزان الشاشة، وزر «حفظ» يخرج عن الحدّ بلا
+   طريقة للوصول إليه (body لا يتمرّر). العلاج: كل وحدة منسوبة للشاشة تُقسَم على
+   معامل التكبير --fz. المُحدِّد هنا أعلى نوعياً (html[data-fz] …) فيغلب ما سبقه. */
+html{--fz:1}
+html[data-fz="s"] .app{height:calc(100vh / var(--fz))}
+html[data-fz="m"] .app{height:calc(100vh / var(--fz))}
+html[data-fz="l"] .app{height:calc(100vh / var(--fz))}
+html[data-fz="xl"] .app{height:calc(100vh / var(--fz))}
+html[data-fz] .findings{max-height:calc(32vh / var(--fz))}
+html[data-fz] .stack{max-height:calc(50vh / var(--fz))}
+html[data-fz] .palette{margin-top:calc(11vh / var(--fz))}
+html[data-fz] .palette-results{max-height:calc(47vh / var(--fz))}
+html[data-fz] .team-live{max-height:calc(34vh / var(--fz))}
+html[data-fz] .src-table{max-height:calc(34vh / var(--fz))}
+html[data-fz] .link-pick{max-height:calc(24vh / var(--fz))}
+html[data-fz] .link-suggest{max-height:calc(38vh / var(--fz))}
+html[data-fz] .drawer{height:calc(100vh / var(--fz))}
+@media (max-width:900px){
+  html[data-fz] .app{min-height:calc(100vh / var(--fz))}
+  html[data-fz] .ai-panel{max-height:calc(60vh / var(--fz))}
+}
+/* صندوق النوافذ: الترويسة والتذييل يبقيان، والمحتوى وحده يتمرّر */
+html[data-fz] .modal-box{margin-top:calc(9vh / var(--fz));max-height:calc(88vh / var(--fz));overflow:hidden}
+html[data-fz] .modal-box.wide{max-height:calc(88vh / var(--fz))}
+html[data-fz] .settings-grid,
+html[data-fz] .modal-box > .settings-grid{overflow:auto;min-height:0}
+html[data-fz] .modal-actions{
+  position:sticky;bottom:0;z-index:2;
+  background:var(--panel);border-top:1px solid var(--line);
+  margin:0 -18px -18px;padding:12px 18px;
+}
+
+/* جواب «اسأل مكتبتك» (2026-11-15) — تنسيق Markdown بسيط بعد الهروب */
+.ask-answer{line-height:1.95;font-size:13px;max-height:46vh;overflow:auto;padding-inline-end:4px}
+.ask-answer .ask-h1{font-size:14px;font-weight:600;margin:8px 0 4px}
+.ask-answer .ask-h2{font-size:13.5px;font-weight:600;margin:7px 0 3px}
+.ask-answer .ask-h3{font-size:13px;font-weight:600;margin:6px 0 2px;color:var(--txt)}
+.ask-answer .ask-li{margin:2px 0;padding-inline-start:4px}
+.ask-answer .ask-cite{font-family:var(--mono);font-size:11px;color:var(--amber);padding:0 2px}

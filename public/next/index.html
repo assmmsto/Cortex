@@ -1,0 +1,135 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>كورتكس — وكيلك المحلي</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Alexandria:wght@400;500;600;700&family=IBM+Plex+Sans+Arabic:wght@300;400;500;600&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="/next/next.css?v=1" />
+</head>
+<body>
+
+<!-- ═══════════ الترويسة: تعريف + حالة، لا إجراءات ═══════════ -->
+<header class="top">
+  <span class="brand">كورتكس <small>· وكيلك المحلي</small></span>
+  <span class="statusline" id="statusline">
+    <span class="stt-dot" id="stt-dot"></span>
+    <span><span id="status-em">أتحقق…</span><span id="status-rest"></span></span>
+  </span>
+  <span class="sp"></span>
+  <button class="chipbtn acc hidden" id="approvals-chip" type="button">تنتظر قرارك: <span id="approvals-n">0</span></button>
+  <a class="top-link" href="/" title="العودة إلى الواجهة الكلاسيكية">← الواجهة الكلاسيكية</a>
+</header>
+
+<div class="shell">
+  <!-- ═══════════ التنقل: ثلاث حواف (أسئلتك أنت) ═══════════ -->
+  <nav class="side">
+    <div class="side-sec">الوكيل — ماذا يفعل عنك</div>
+    <button class="nv on" data-view="agent" type="button">المحادثة</button>
+    <button class="nv" data-view="abroad" type="button">في غيابي <small id="abroad-hint"></small></button>
+
+    <div class="side-sec">مكتبتي — ما يملكه عنك</div>
+    <button class="nv" data-view="projects" type="button">المشاريع</button>
+    <button class="nv" data-view="knowledge" type="button">المعرفة <small id="kn-hint"></small></button>
+
+    <div class="side-sec">التشغيل — كيف يعمل النظام</div>
+    <button class="nv" data-view="ops" type="button">مركز التشغيل</button>
+
+    <div class="foot">
+      <div class="sub">الواجهة الكلاسيكية كاملة متاحة دائماً من الرابط أعلى الصفحة — هذه واجهة تجريبية تُبنى مرحلةً مرحلة أمامك.</div>
+    </div>
+  </nav>
+
+  <main class="main">
+
+    <!-- ─────────── الوكيل: المحادثة ─────────── -->
+    <section class="view on flexview" id="v-agent">
+      <div class="chat-wrap">
+        <div class="vh"><h1 class="d">المحادثة</h1><span class="lead" id="agent-lead">اكتب جملتك — أقرأ وأعمل، ولن أكتب شيئاً بلا إذنك.</span></div>
+        <div class="feed" id="feed">
+          <div class="card" id="hello">
+            <div class="t">مرحباً. أنا كورتكس.</div>
+            <p class="muted" style="font-size:13.5px; margin-top:6px">اكتب لي ما تريد بجملتك العادية — أقرأ معرفتك ومشاريعك وأنفّذ فعلاً. جرّب مثلاً:</p>
+            <div class="row" id="examples">
+              <button class="btn sm" type="button" data-goal="كم عنصراً عندي؟ اذكر العدد فقط">كم عنصراً عندي؟</button>
+              <button class="btn sm" type="button" data-goal="ما الفجوات في معرفتي؟">ما الفجوات في معرفتي؟</button>
+              <button class="btn sm" type="button" data-goal="اعرض لي مشاريعي المحتضاة وما تعرفه عنها">اعرض مشاريعي المحتضاة</button>
+            </div>
+          </div>
+        </div>
+        <div class="compose">
+          <div class="comp-row">
+            <textarea class="input" id="goal-input" rows="2" placeholder="اكتب جملتك… ثم Enter"></textarea>
+            <button class="send" id="send-btn" type="button">أرسل</button>
+          </div>
+          <div class="hintline" id="chat-hint">كل خطوة ستراها هنا بلغة واضحة — وما يحتاج إذنك سيظهر كبطاقة قرار.</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ─────────── في غيابي ─────────── -->
+    <section class="view" id="v-abroad">
+      <div class="vh"><h1 class="d">في غيابي</h1><span class="lead">كل ما عملته وحدي — بلغة واضحة، ولا تغيير صامت.</span></div>
+      <div class="vsub" id="abroad-sub">أجمع تشغيلاتك الأخيرة ونبضاتي التلقائية…</div>
+      <div id="abroad-body"></div>
+    </section>
+
+    <!-- ─────────── مشاريعي ─────────── -->
+    <section class="view" id="v-projects">
+      <div class="vh"><h1 class="d">المشاريع</h1><span class="lead">كل ما أعرفه عنك يعيش في مشاريع — هذه التي احتضنتها حتى الآن.</span></div>
+      <div class="vsub">«الاحتضان»: أمسح مجلد المشروع فعلياً وأبني خريطة مرجعية واعتمادية — لا أنسخ ملفاتك.</div>
+      <div class="grid3" id="projects-grid"></div>
+      <div class="empty-block hidden" id="projects-empty">
+        <h2>لا مشاريع محتضاة بعد</h2>
+        <p>اطلب مني في المحادثة: «احتضن مشروع <span class="mono" dir="ltr">المسار</span>» — أو بالأحرى: اكتب جملة تشير إلى مجلد مشروعك، وسأفهمه وأبني خريطته.</p>
+        <button class="btn pri" type="button" data-goto="agent" data-fill="احتضن مشروع ">افتح المحادثة</button>
+      </div>
+    </section>
+
+    <!-- ─────────── مشروع واحد ─────────── -->
+    <section class="view" id="v-project">
+      <button class="back" id="proj-back" type="button">‹ رجوع إلى المشاريع</button>
+      <div class="proj-h">
+        <h2 class="d" id="proj-name">—</h2>
+        <span class="facts" id="proj-facts"></span>
+        <span class="sp"></span>
+        <button class="btn" id="proj-ask" type="button">اسألني عنه هنا</button>
+      </div>
+      <div id="proj-body"></div>
+    </section>
+
+    <!-- ─────────── المعرفة ─────────── -->
+    <section class="view" id="v-knowledge">
+      <div class="vh"><h1 class="d">المعرفة</h1><span class="lead">عناصرك ومستنداتك — أقرأ منها كلما كلفتني شيئاً.</span></div>
+      <div class="searchrow">
+        <input class="input" id="kn-search" placeholder="ابحث في معرفتك…" />
+        <button class="btn" id="kn-refresh" type="button">تحديث</button>
+      </div>
+      <div class="vsub" id="kn-count"></div>
+      <div class="klist" id="kn-list"></div>
+    </section>
+
+    <!-- ─────────── مركز التشغيل ─────────── -->
+    <section class="view" id="v-ops">
+      <div class="vh"><h1 class="d">مركز التشغيل</h1><span class="lead">كل قدرة في النظام بعنوانها البشري — تُنقل إلى هذه الواجهة مرحلةً مرحلة.</span></div>
+      <div class="vsub">ما هو مُعاد بناؤه هنا يعمل مباشرة؛ وما زال على الواجهة الكلاسيكية يفتحها بزر واحد — لا شيء مخفي.</div>
+      <div class="cap-grid" id="ops-grid"></div>
+    </section>
+
+  </main>
+</div>
+
+<!-- ─────────── لوح العرض (عنصر معرفة) ─────────── -->
+<div class="veil" id="veil">
+  <div class="drawer">
+    <div class="drawer-h"><h2 id="dr-title">—</h2><button class="x" id="dr-x" type="button">✕</button></div>
+    <div class="drawer-meta" id="dr-meta"></div>
+    <div class="drawer-b" id="dr-body">…</div>
+  </div>
+</div>
+
+<script src="/next/next.js?v=2"></script>
+</body>
+</html>

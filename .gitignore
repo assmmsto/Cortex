@@ -1,0 +1,98 @@
+# ═══════════════════════════════════════════════════════════════════
+#  Cortex — قاعدة تجنّب Git
+#  القاعدة الحاكمة: لا يصل أي شيء من بيانات المستخدم أو أسراره إلى git.
+#  تحقّق بـ:  node tmp/audit/gitignore-audit.cjs   (من جذر المشروع)
+# ═══════════════════════════════════════════════════════════════════
+
+# ── بيانات وقت التشغيل (لا تُنشر أبداً) ─────────────────────────────
+# الخزنة الشخصية — بيانات المستخدم، تُستثنى من الطباعة والنشر.
+# مثبّتة على الجذر عمداً: examples/vault/ بيانات عرض يجب أن تبقى منشورة.
+/vault/
+/data/
+/.perch/
+/work/
+/.mimosa/
+node_modules/
+/tmp/
+
+# ── أسرار وملفات تُنشأ وقت التشغيل (حتى خارج data/) ────────────────
+# سبب الإضافة (2026-11-15): `/data/` يحمي المكان المعتاد فقط؛ نسخة يدوية من
+# notes-cache.json أو زبدة نسخة احتياطية خارج المجلد كانت تُفلت. الأنماط
+# أدناه عالمية فتحجبها أينما وُجدت.
+*.token
+*.keystore
+session.token
+mcp.token
+audit.key
+audit.lock
+audit.head.json
+settings.json
+workspace-state.json
+notes-cache.json
+vector-index.json
+vector-index.dirty.json
+vector-index.json.corrupt-*
+cortex.db
+cortex.db-wal
+cortex.db-shm
+cortex-backup-*.zip
+agent-pending.json
+agent-findings.json
+scheduler-log.jsonl
+server-errors.log
+watchdog.pid
+*.corrupt-*
+
+# ── مخرجات البناء والتغطية ──────────────────────────────────────────
+dist/
+build/
+coverage/
+tests/browser/shots/
+*.tgz
+
+# ── سجلات وملفات مؤقتة ──────────────────────────────────────────────
+*.log
+*.log.*
+*.tmp
+*.tmp.*
+*.pid
+*.bak
+*.orig
+*.swp
+*.rej
+
+# ── أسرار ومفاتيح وبيانات اعتماد ────────────────────────────────────
+.env
+.env.*
+*.env
+*.key
+*.pem
+*.crt
+*.p12
+*.pfx
+*.jks
+id_rsa*
+id_ed25519*
+.ssh/
+.aws/
+.npmrc
+
+# ── شوارد أنظمة التشغيل والمحرّرات ──────────────────────────────────
+.DS_Store
+Thumbs.db
+desktop.ini
+.vscode/
+.idea/
+*.code-workspace
+
+# ── آثار محلية وقت التطوير ──────────────────────────────────────────
+# تقارير صيانة هذا الجهاز (BIOS/شاشة/نظام) — وثائق محلية لا تدخل النشر
+docs/local-machine/
+.cortex-sandbox/
+tmp/
+*.stackdump
+
+# ── ملفات تخصيص محلي لا تُنشر ──────────────────────────────────────
+launch-cortex.vbs
+cortex-service-task.xml
+supervisor.bat

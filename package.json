@@ -1,0 +1,68 @@
+{
+  "name": "cortex",
+  "version": "5.0.0",
+  "description": "Cortex — a model-native project brain with MCP memory and agent workflows.",
+  "main": "electron-main.js",
+  "type": "commonjs",
+  "keywords": [
+    "cortex",
+    "mcp",
+    "memory",
+    "knowledge-base",
+    "notes",
+    "markdown",
+    "local-first",
+    "sqlite",
+    "agent",
+    "llm",
+    "project-memory"
+  ],
+  "files": [
+    "server.js",
+    "cortex-*.js",
+    "mcp-memory-server.js",
+    "electron-main.js",
+    "public/",
+    "skills/",
+    "tools/",
+    "docs/",
+    "examples/",
+    "README.md",
+    "LICENSE",
+    "NOTICE",
+    "SECURITY.md",
+    "CHANGELOG.md"
+  ],
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js",
+    "test": "node tests/run-suite.cjs",
+    "test:core": "node --test --test-concurrency=1 tests/api.test.mjs tests/agent.test.mjs tests/language.test.mjs tests/mcp.test.mjs tests/retrieval.test.mjs tests/scheduler.test.mjs tests/store.test.mjs",
+    "test:layers": "node --test --test-concurrency=1 tests/policy-tools.test.mjs tests/layers.test.mjs tests/mcp-client.test.mjs tests/regression.test.mjs",
+    "test:hardening": "node --test --test-concurrency=1 tests/hardening.test.mjs",
+    "test:reference": "node tests/reference-runner.mjs",
+    "test:browser": "node tests/browser/run.cjs",
+    "mcp": "node mcp-memory-server.js",
+    "desktop": "cortex-desktop.bat",
+    "desktop:native": "electron .",
+    "gc": "node tools/asset-gc.cjs",
+    "gc:apply": "node tools/asset-gc.cjs --apply",
+    "eval:agent": "node tools/agent-eval.cjs"
+  },
+  "engines": {
+    "node": ">=22.5"
+  },
+  "license": "MIT",
+  "author": "Assm Mssto",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/REPLACE_WITH_YOUR_USERNAME/cortex.git"
+  },
+  "bugs": {
+    "url": "https://github.com/REPLACE_WITH_YOUR_USERNAME/cortex/issues"
+  },
+  "homepage": "https://github.com/REPLACE_WITH_YOUR_USERNAME/cortex#readme",
+  "devDependencies": {
+    "electron": "^44.9.0"
+  }
+}

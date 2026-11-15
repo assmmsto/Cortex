@@ -1,0 +1,183 @@
+/* ═══════════════════════════════════════════════════════════════
+   Cortex — الواجهة الجديدة (N1). مبنية على المواصفة المعتمدة (docs/audit/13)
+   والمبادئ المقيسة (docs/audit/14). القديمة تبقى على / — الجديدة على /next/.
+   ═══════════════════════════════════════════════════════════════ */
+:root{
+  --bg:#0F1216; --side:#121720; --card:#171C23; --raised:#1D242D;
+  --ink:#E9EEF4; --ink2:#9BA6B2; --ink3:#6C7683;
+  --line:#232B35; --line2:#2E3845;
+  --acc:#E3B04B; --acc-dim:#8a6d2a; --acc-bg:#241e0f;
+  --ok:#6fce93; --ok-bg:#12251a; --bad:#E07B7B; --bad-bg:#2a1516;
+  --r-lg:14px; --r-md:10px; --r-sm:8px;
+}
+*{box-sizing:border-box; margin:0; padding:0}
+html,body{height:100%}
+body{
+  font-family:'IBM Plex Sans Arabic', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  font-size:15px; line-height:1.75; color:var(--ink); background:var(--bg);
+  display:flex; flex-direction:column;
+}
+button{font:inherit; color:inherit; background:none; border:none; cursor:pointer}
+a{color:var(--acc); text-decoration:none}
+a:hover{text-decoration:underline; text-underline-offset:3px}
+.d{font-family:'Alexandria', 'IBM Plex Sans Arabic', sans-serif}
+.hidden{display:none !important}
+
+/* ── الترويسة ── */
+.top{display:flex; align-items:center; gap:16px; height:58px; padding:0 22px; border-bottom:1px solid var(--line); background:var(--side); flex:none}
+.brand{font-family:'Alexandria', sans-serif; font-weight:700; font-size:19px; letter-spacing:-.2px}
+.brand small{font-family:'IBM Plex Sans Arabic'; font-weight:400; font-size:12.5px; color:var(--ink3); margin-inline-start:7px}
+.statusline{display:flex; align-items:center; gap:9px; color:var(--ink2); font-size:13.5px; min-width:0}
+.stt-dot{width:7px; height:7px; border-radius:50%; background:var(--ok); flex:none}
+.stt-dot.busy{background:var(--acc); animation:pulse 1.6s ease-in-out infinite}
+@keyframes pulse{50%{opacity:.35}}
+#status-em{color:var(--ink); font-weight:500}
+.sp{flex:1}
+.chipbtn{display:inline-flex; align-items:center; gap:7px; font-size:13px; color:var(--ink2); padding:6px 12px; border:1px solid var(--line); border-radius:99px; background:transparent}
+.chipbtn:hover{border-color:var(--ink3); color:var(--ink)}
+.chipbtn.acc{color:var(--acc); border-color:var(--acc-dim); background:var(--acc-bg); font-weight:500}
+.top-link{color:var(--ink2); font-size:13.5px; padding:7px 10px; border-radius:var(--r-sm)}
+.top-link:hover{background:var(--raised); color:var(--ink); text-decoration:none}
+
+/* ── الهيكل ── */
+.shell{display:grid; grid-template-columns:236px minmax(0,1fr); flex:1; min-height:0}
+.side{border-inline-end:1px solid var(--line); background:var(--side); padding:16px 12px; display:flex; flex-direction:column; gap:2px; overflow-y:auto}
+.side-sec{margin:14px 0 6px; font-size:11.5px; font-weight:600; color:var(--ink3); letter-spacing:.04em; padding:0 10px}
+.side-sec:first-child{margin-top:2px}
+.nv{display:flex; align-items:center; gap:9px; text-align:start; padding:9px 11px; border-radius:var(--r-md); color:var(--ink2); font-size:13.5px; border-inline-end:2px solid transparent; width:100%}
+.nv:hover{background:var(--raised); color:var(--ink)}
+.nv.on{background:var(--raised); color:var(--ink); font-weight:500; border-inline-end-color:var(--acc)}
+.nv .cnt{margin-inline-start:auto; background:var(--acc); color:#201704; font-size:11.5px; font-weight:700; border-radius:99px; padding:0 8px; min-width:22px; text-align:center}
+.nv small{color:var(--ink3); font-weight:400; font-size:11.5px}
+.side .foot{margin-top:auto; padding-top:14px}
+.side .foot .sub{color:var(--ink3); font-size:11.5px; padding:2px 10px 0; line-height:1.6}
+
+/* ── المنطقة العامة ── */
+.main{min-width:0; display:flex; flex-direction:column; overflow:hidden}
+.view{display:none; min-height:0; flex:1; overflow-y:auto; padding:26px 32px 30px}
+.view.on{display:block}
+.view.on.flexview{display:flex; flex-direction:column}
+.vh{display:flex; align-items:baseline; gap:14px; flex-wrap:wrap}
+.vh h1{font-family:'Alexandria', sans-serif; font-size:22px; font-weight:600; letter-spacing:-.2px}
+.vh .lead{color:var(--ink3); font-size:13px}
+.vsub{color:var(--ink2); font-size:13.5px; margin:2px 0 20px}
+.mono{font-family:ui-monospace, 'Cascadia Mono', Consolas, monospace; font-size:12.5px}
+.muted{color:var(--ink3)}
+.small{font-size:12.5px}
+
+/* ── الوكيل: المحادثة ── */
+.chat-wrap{max-width:800px; margin:0 auto; width:100%; flex:1; display:flex; flex-direction:column; min-height:0}
+.feed{flex:1; overflow-y:auto; display:flex; flex-direction:column; gap:18px; padding:14px 0 18px}
+.who{font-size:12px; color:var(--ink3); margin-bottom:5px}
+.who.agent{color:var(--acc)}
+.said{background:var(--card); border:1px solid var(--line); border-radius:var(--r-md); padding:11px 15px; font-weight:500; max-width:640px}
+.reply{padding:0 2px; max-width:68ch; white-space:pre-wrap}
+.card{background:var(--card); border:1px solid var(--line); border-radius:var(--r-md); padding:14px 16px}
+.card .t{font-weight:600; font-size:14px}
+.plan{border:1px solid var(--acc-dim); border-radius:var(--r-md); padding:14px 16px; background:transparent}
+.steps{display:flex; flex-direction:column; gap:8px; margin-top:10px}
+.step{display:flex; gap:10px; align-items:baseline; font-size:13.5px; color:var(--ink2)}
+.step .dt{width:7px; height:7px; border-radius:50%; background:var(--line2); flex:none; margin-top:7px}
+.step.done{color:var(--ink)}
+.step.done .dt{background:var(--ok)}
+.step.now{color:var(--ink); font-weight:500}
+.step.now .dt{background:var(--acc); animation:pulse 1.4s ease-in-out infinite}
+.step .err{color:var(--bad)}
+.ask{border:1px solid var(--line2); border-radius:var(--r-md); padding:14px 16px; background:var(--card)}
+.ask .t{color:var(--acc)}
+.ask ul{margin:8px 0 4px; padding-inline-start:18px; font-size:13.5px}
+.ask ul li{margin:3px 0}
+.result{background:var(--ok-bg); border:1px solid #1d3a29}
+.result .badge{display:inline-block; background:rgba(111,206,147,.15); color:var(--ok); font-size:12px; font-weight:600; border-radius:99px; padding:1px 10px; margin-bottom:7px}
+.result .meta{color:var(--ink3); font-size:12.5px; margin-top:6px}
+.err-card{background:var(--bad-bg); border:1px solid #3a2022; color:var(--bad)}
+.row{display:flex; gap:9px; margin-top:12px; flex-wrap:wrap; align-items:center}
+.btn{padding:8px 16px; border-radius:var(--r-sm); font-weight:500; font-size:13.5px; border:1px solid var(--line2); color:var(--ink); background:var(--card)}
+.btn:hover{border-color:var(--ink3)}
+.btn.pri{background:var(--acc); color:#201704; border-color:transparent; font-weight:600}
+.btn.pri:hover{background:#eec05f}
+.btn.quiet{border-color:transparent; color:var(--ink2)}
+.btn.quiet:hover{background:var(--raised); color:var(--ink)}
+.btn:disabled{opacity:.5; cursor:default}
+.btn.sm{padding:5px 12px; font-size:12.5px}
+.compose{border-top:1px solid var(--line); padding:13px 0 6px; flex:none}
+.comp-row{display:flex; gap:10px; align-items:flex-end}
+textarea.input, input.input{width:100%; background:var(--card); color:var(--ink); border:1px solid var(--line2); border-radius:var(--r-md); padding:12px 15px; font:inherit; resize:none}
+textarea.input{min-height:52px}
+input.input{min-height:auto; height:40px}
+textarea.input:focus, input.input:focus{outline:2px solid var(--acc-dim); outline-offset:1px; border-color:transparent}
+.send{padding:13px 22px; border-radius:var(--r-md); background:var(--acc); color:#201704; font-weight:700; font-size:14px; flex:none}
+.send:disabled{opacity:.45}
+.hintline{color:var(--ink3); font-size:12.5px; padding-top:8px}
+.src-row{display:flex; align-items:center; gap:10px; padding:8px 12px; background:var(--card); border:1px solid var(--line); border-radius:var(--r-sm); margin-top:7px; font-size:13px}
+.src-row .lk{margin-inline-start:auto; color:var(--acc); font-weight:500; font-size:12.5px}
+
+/* ── مشاريعي ── */
+.grid3{display:grid; grid-template-columns:repeat(auto-fill, minmax(272px, 1fr)); gap:16px}
+.pcard{display:flex; flex-direction:column; gap:6px; text-align:start; background:var(--card); border:1px solid var(--line); border-radius:var(--r-lg); padding:16px 18px}
+.pcard:hover{border-color:var(--acc-dim)}
+.pcard .n{font-family:'Alexandria', sans-serif; font-size:17px; font-weight:600}
+.pcard .m{color:var(--ink2); font-size:13px}
+.pcard .m b{color:var(--ink); font-weight:500}
+.pcard .chip{align-self:flex-start; background:var(--acc-bg); color:var(--acc); font-size:12px; font-weight:500; border-radius:99px; padding:1px 10px; margin-top:2px}
+.empty-block{padding:36px 4px; max-width:56ch}
+.empty-block h2{font-family:'Alexandria'; font-size:19px; font-weight:600; margin-bottom:7px}
+.empty-block p{color:var(--ink2); font-size:13.5px; margin-bottom:8px}
+.back{color:var(--ink2); font-size:13px; padding:5px 0; margin-bottom:6px; display:inline-block}
+.proj-h{display:flex; align-items:center; gap:14px; flex-wrap:wrap}
+.proj-h h2{font-family:'Alexandria'; font-size:26px; font-weight:600; letter-spacing:-.3px}
+.facts{color:var(--ink3); font-size:12.5px}
+.sect{margin-top:28px}
+.sect h3{font-family:'Alexandria'; font-size:15.5px; font-weight:600; margin-bottom:2px}
+.sect .ss{color:var(--ink3); font-size:12.5px; margin-bottom:10px}
+.line-row{display:flex; align-items:center; gap:12px; padding:11px 14px; background:var(--card); border:1px solid var(--line); border-radius:var(--r-md); margin-bottom:7px; font-size:13.5px}
+.line-row .when{color:var(--ink3); font-size:12px; flex:none}
+.line-row .lk{margin-inline-start:auto; color:var(--acc); font-size:12.5px; font-weight:500; flex:none}
+.line-row.warn{border-color:var(--acc-dim); color:var(--acc)}
+.keys{display:flex; flex-wrap:wrap; gap:6px; margin-top:8px}
+.key{font-size:11.5px; color:var(--ink2); background:var(--raised); border-radius:99px; padding:2px 10px}
+.arrow{color:var(--ink3)}
+
+/* ── المعرفة ── */
+.searchrow{display:flex; gap:10px; margin-bottom:16px; max-width:760px}
+.klist{display:flex; flex-direction:column; gap:6px; max-width:860px}
+.krow{display:flex; align-items:baseline; gap:12px; text-align:start; padding:11px 14px; background:var(--card); border:1px solid var(--line); border-radius:var(--r-md); width:100%}
+.krow:hover{border-color:var(--acc-dim)}
+.krow .tt{font-weight:500; font-size:13.5px}
+.krow .ty{color:var(--ink3); font-size:11.5px; flex:none}
+.krow .pj{color:var(--ink3); font-size:11.5px; margin-inline-start:auto; flex:none}
+
+/* ── في غيابي ── */
+.day{font-family:'Alexandria'; font-weight:600; font-size:14.5px; margin:20px 0 8px}
+.entry{display:flex; gap:14px; padding:10px 0; border-bottom:1px solid var(--line); font-size:13.5px}
+.entry:last-child{border-bottom:none}
+.entry .tm{color:var(--ink3); font-size:12px; min-width:64px; padding-top:3px; flex:none}
+.entry .tx{flex:1; min-width:0}
+.entry .ok-tag{color:var(--ok); font-size:12px; font-weight:600}
+.entry .bad-tag{color:var(--bad); font-size:12px; font-weight:600}
+
+/* ── التشغيل: بوابة القدرات ── */
+.cap-grid{display:grid; grid-template-columns:repeat(auto-fill, minmax(290px, 1fr)); gap:14px; max-width:1080px}
+.cap{background:var(--card); border:1px solid var(--line); border-radius:var(--r-lg); padding:16px 18px; display:flex; flex-direction:column; gap:6px}
+.cap h3{font-family:'Alexandria'; font-size:15px; font-weight:600}
+.cap p{color:var(--ink2); font-size:13px}
+.cap .go{margin-top:6px; align-self:flex-start; font-size:12.5px}
+.cap .badge-soft{align-self:flex-start; font-size:11px; color:var(--ink3); background:var(--raised); border-radius:99px; padding:1px 9px; margin-top:4px}
+
+/* ── لوح عرض (عنصر/ملف) ── */
+.veil{position:fixed; inset:0; background:rgba(5,7,9,.62); display:none; justify-content:flex-end; z-index:40}
+.veil.on{display:flex}
+.drawer{width:min(680px, 94vw); background:var(--bg); border-inline-start:1px solid var(--line2); display:flex; flex-direction:column}
+.drawer-h{display:flex; align-items:center; gap:10px; padding:14px 20px; border-bottom:1px solid var(--line); flex:none}
+.drawer-h h2{font-size:16px; font-weight:600; white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
+.drawer-h .x{margin-inline-start:auto; color:var(--ink2); width:30px; height:30px; border-radius:8px; display:grid; place-items:center; flex:none}
+.drawer-h .x:hover{background:var(--raised); color:var(--ink)}
+.drawer-b{flex:1; overflow-y:auto; padding:16px 20px; white-space:pre-wrap; font-size:13.5px; line-height:1.8}
+.drawer-meta{color:var(--ink3); font-size:12px; padding:0 20px 12px; display:flex; gap:14px; flex-wrap:wrap}
+
+@media (max-width:900px){
+  .shell{grid-template-columns:1fr}
+  .side{border-inline-end:none; border-bottom:1px solid var(--line); flex-direction:row; flex-wrap:wrap; align-items:center}
+  .side-sec{display:none}
+  .view{padding:18px 16px}
+}

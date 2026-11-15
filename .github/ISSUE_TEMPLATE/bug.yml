@@ -1,0 +1,65 @@
+name: بلاغ عطل
+description: أبلغ عن سلوك غير متوقع في Cortex
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        لا تُدرج مفتاح API ولا رمز جلسة ولا مسارات جهازك في البلاغ.
+        للثغرات الأمنية استعمل تبويب Security ← Report a vulnerability، لا هذا النموذج.
+  - type: textarea
+    id: what
+    attributes:
+      label: ما حدث
+      description: وصف موجز ومحدد.
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: خطوات الإعادة
+      placeholder: |
+        1. افتح …
+        2. اضغط …
+        3. يظهر …
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: ما كان يجب أن يحدث
+    validations:
+      required: true
+  - type: textarea
+    id: evidence
+    attributes:
+      label: الدليل
+      description: رسالة الخطأ كما هي، أو مخرجات `data/server-errors.log`، أو لقطة شاشة بلا بيانات شخصية.
+  - type: input
+    id: version
+    attributes:
+      label: الإصدار
+      description: مخرجات `git rev-parse --short HEAD` أو رقم الإصدار.
+    validations:
+      required: true
+  - type: input
+    id: node
+    attributes:
+      label: نسخة Node ونظام التشغيل
+      placeholder: node 20.11 على Windows 11
+    validations:
+      required: true
+  - type: dropdown
+    id: surface
+    attributes:
+      label: الموضع
+      options:
+        - الواجهة (المعرفة/الخريطة/الإعدادات…)
+        - الخادم/API
+        - الاسترجاع (البحث والفهرسة)
+        - الوكيل والتشغيلات
+        - الاستيراد والتصدير
+        - MCP
+        - التثبيت والتشغيل
+    validations:
+      required: true

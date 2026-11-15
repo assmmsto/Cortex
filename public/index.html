@@ -1,0 +1,869 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ctext y='24' font-size='24'%3E🧠%3C/text%3E%3C/svg%3E">
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Cortex — الذاكرة الحيّة</title>
+<!-- الخطوط المحلية أولاً (2026-11-05): كان يُحمَّل Space Grotesk/IBM Plex من
+     fonts.googleapis.com في كل فتحة واجهة — أي أن Google ترى كل تشغيل، ويُكسر
+     العمل بلا إنترنت. الآن: خط النظام إن وُجد الخط المحلي، وإلا بديل نظامي. -->
+<link rel="stylesheet" href="/styles.css?v=45" />
+</head>
+<body>
+  <a class="skip-link" href="#work" data-i18n="a11y_skip">تخطَّ إلى المحتوى الرئيسي</a>
+
+  <!-- ═══ ⌘K ═══ -->
+  <div id="palette" class="overlay hidden" role="dialog" aria-modal="true" aria-label="لوحة الأوامر" data-i18n-aria="aria_palette">
+    <div class="palette">
+      <input id="palette-input" class="palette-input" data-i18n-ph="ph_palette" placeholder="ابحث عن عنصر أو نفّذ أمرًا…" autocomplete="off" dir="auto" role="combobox" aria-expanded="false" aria-controls="palette-results" aria-autocomplete="list" />
+      <div id="palette-results" class="palette-results" role="listbox" aria-label="نتائج لوحة الأوامر" data-i18n-aria="aria_palette_results"></div>
+      <div class="palette-hint" data-i18n="palette_hint">↑↓ للتنقل • Enter للتنفيذ • Esc للإغلاق</div>
+    </div>
+  </div>
+
+  <!-- ═══ إضافة مصدر ═══
+       قرار المستخدم: «＋ جديدة» ليست نموذج أنواع ملاحظات (7 أنواع) — المستخدم يقدّم
+       مصدراً، والنظام يصنّف ويحفظ الأصل ويثري الخزنة. أربع طرق مصدر في تبويبات. -->
+  <div id="modal-new" class="overlay hidden" role="dialog" aria-modal="true" aria-labelledby="modal-new-title">
+    <div class="modal-box wide">
+      <div class="modal-title" id="modal-new-title" data-i18n="new_title">عنصر جديد</div>
+      <div class="hint" data-i18n="quick_modal_sub">اكتب ما تريده الآن — للاستيراد افتح قسم الاستيراد.</div>
+      </div>
+
+      <!-- ① مجلد مشروع: معاينة التصنيف ثم استيراد -->
+      <!-- ④ نص سريع: المسار السابق نفسه (عنوان + نص) — بلا نموذج أنواع مفروض -->
+      <div class="src-panel" id="src-panel-quick">
+        <input id="new-title-input" class="input" dir="auto" placeholder="العنوان" data-i18n-ph="ph_title" />
+        <textarea id="new-content-input" class="chat-input" rows="4" dir="auto" placeholder="النص…" data-i18n-ph="ph_quick_text"></textarea>
+        <div class="hint" data-i18n="create_hint_title">العنوان هو اسم العنصر الذي ستجده وتُربطه وتبحث به في المكتبة و⌘K — اكتبه واضحاً.</div>
+        <details class="adv-opt">
+          <summary data-i18n="adv_manual">تصنيف يدوي (اختياري — الوكيل يستنتجه عادة)</summary>
+          <div class="row gap">
+            <select id="new-type-select" class="input sel">
+              <option value="note" data-i18n="t_note">ملاحظة</option>
+              <option value="doc" data-i18n="t_doc">مستند</option>
+              <option value="project" data-i18n="t_project">مشروع</option>
+              <option value="decision" data-i18n="t_decision">قرار</option>
+              <option value="task" data-i18n="t_task">مهمة</option>
+              <option value="meeting" data-i18n="t_meeting">اجتماع</option>
+              <option value="procedure" data-i18n="t_procedure">إجراء</option>
+            </select>
+            <input id="new-project-input" class="input" dir="auto" placeholder="المشروع" data-i18n-ph="ph_project" />
+          </div>
+          <div class="hint" data-i18n="create_hint_type_project">النوع = تصنيفه الدلالي · المشروع = المجموعة التي يظهر تحتها في القائمة (مثل مجلد) — اكتب اسماً جديداً لإنشاء مجموعة، أو اسماً موجوداً للانضمام إليها.</div>
+          <div class="row gap">
+            <span class="lbl" data-i18n="l_importance">الأهمية</span>
+            <div class="seg" id="importance-seg">
+              <button type="button" class="seg-b" data-ui-importance="1" data-i18n="imp_normal">عادي</button>
+              <button type="button" class="seg-b" data-ui-importance="3" data-i18n="imp_important">مهم</button>
+              <button type="button" class="seg-b" data-ui-importance="5" data-i18n="imp_critical">حرِج</button>
+            </div>
+            <input id="importance-input" type="hidden" value="1" />
+          </div>
+        </details>
+      </div>
+
+      <div class="modal-actions">
+        <button id="open-import-btn" class="btn ghost" type="button" data-i18n="b_open_import">استيراد ملف/مجلد/رابط ↗</button>
+        <button id="create-note-btn" class="btn primary" data-i18n="b_create">إنشاء</button>
+        <button id="close-new-btn" class="btn ghost" data-i18n="b_cancel">إلغاء</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ الإعدادات ═══ -->
+  <div id="modal-settings" class="overlay hidden" role="dialog" aria-modal="true" aria-labelledby="modal-settings-title">
+    <div class="modal-box wide">
+      <div class="modal-title" id="modal-settings-title" data-i18n="settings_title">الإعدادات</div>
+      <div class="settings-grid">
+        <section class="card soft">
+          <div class="section-title" data-i18n="s_generation">التوليد</div>
+          <!-- المزودون لهم مكان **واحد**: قسم «المزودون». هنا عرض للقراءة فقط وانتقال،
+               كي لا يُحرَّر المزود (عنوان/مفتاح/نموذج) في شاشتين فتتناقض النسختان. -->
+          <div id="active-model-line" class="active-line" dir="auto"></div>
+          <div class="row gap">
+            <button id="goto-providers-btn" type="button" class="btn ghost sm" data-i18n="b_manage_providers">إدارة المزوّدين</button>
+          </div>
+          <label class="lbl"><span data-i18n="l_temp">الحرارة</span><input id="temp-input" type="range" min="0" max="2" step="0.05" value="0.2" /></label>
+          <div id="temp-label" class="hint mono">0.20</div>
+        </section>
+        <section class="card soft">
+          <div class="section-title" data-i18n="s_retrieval">الاسترجاع</div>
+          <label class="lbl"><span data-i18n="l_emb_provider">مزود embeddings</span><select id="retrieval-provider-select" class="sel"><option value="local-ngram" data-i18n="emb_local">محلي بلا شبكة (n-gram)</option><option value="mock">Mock</option><option value="openai-compatible">OpenAI-compatible</option><option value="ollama">Ollama</option></select></label>
+          <label class="lbl"><span data-i18n="l_emb_model">Embedding model</span><input id="retrieval-model-input" class="input" dir="ltr" /></label>
+          <label class="lbl"><span data-i18n="l_emb_base">Embedding base URL</span><input id="retrieval-base-url-input" class="input" dir="ltr" /></label>
+          <label class="lbl"><span data-i18n="l_emb_key">Embedding API key</span><input id="retrieval-api-key-input" type="password" class="input" dir="ltr" /></label>
+          <label class="lbl"><span data-i18n="l_rerank">Rerank</span><select id="retrieval-rerank-select" class="sel"><option value="mmr">MMR</option><option value="score">Score</option></select></label>
+          <label class="lbl"><span data-i18n="l_topk">Top K</span><input id="retrieval-topk-input" type="range" min="3" max="20" step="1" value="8" /></label>
+          <div id="retrieval-topk-label" class="hint mono">8</div>
+          <div class="row gap"><button id="rebuild-index-btn" type="button" class="btn ghost sm" data-i18n="b_rebuild">إعادة بناء الفهرس</button><span id="retrieval-status" class="hint mono"></span></div>
+        </section>
+        <section class="card soft">
+          <div class="section-title" data-i18n="s_policy">الوكيل والسياسة</div>
+          <label class="lbl"><span data-i18n="l_autonomy">وضع الوكيل</span><select id="autonomy-select" class="sel"><option value="supervised" data-i18n="p_supervised">خاضع للإشراف (مسودات)</option><option value="autonomous" data-i18n="p_autonomous">مستقل (تنفيذ فوري)</option></select></label>
+          <label class="lbl"><span data-i18n="l_language">لغة الوكيل</span><select id="lang-mode-select" class="sel"><option value="auto" data-i18n="lang_auto">تلقائي (هدفك يحدد)</option><option value="ar" data-i18n="lang_ar">عربي دائمًا</option><option value="en" data-i18n="lang_en">English always</option></select></label>
+          <label class="lbl"><span data-i18n="l_schedule">فحص دوري للوكيل — كل (ساعات)</span><input id="schedule-hours" type="number" min="0" max="168" value="0" class="input" /></label>
+          <div class="hint" data-i18n="policy_note">في الوضع الخاضع: تصبح كتابات الوكيل مسودات تعتمدها بنفسك من لوحة الوكيل قبل دمجها.</div>
+        </section>
+        <section class="card soft accent-section">
+          <div class="section-title" data-i18n="s_appearance">المظهر</div>
+          <div class="lbl"><span data-i18n="l_ui_lang">لغة الواجهة</span>
+            <div class="seg">
+              <button type="button" class="seg-b" data-ui-lang="ar">العربية</button>
+              <button type="button" class="seg-b" data-ui-lang="en">English</button>
+            </div>
+          </div>
+          <div class="lbl"><span data-i18n="l_fontsize">حجم الخط</span>
+            <div class="seg">
+              <button type="button" class="seg-b" data-ui-fz="s">S</button>
+              <button type="button" class="seg-b" data-ui-fz="m">M</button>
+              <button type="button" class="seg-b" data-ui-fz="l">L</button>
+              <button type="button" class="seg-b" data-ui-fz="xl">XL</button>
+            </div>
+          </div>
+          <div class="lbl"><span data-i18n="l_accent">لون التمييز</span>
+            <div class="seg">
+              <button type="button" class="seg-b swatch" data-ui-accent="amber" data-i18n-aria="acc_amber" data-i18n-title="acc_amber"></button>
+              <button type="button" class="seg-b swatch" data-ui-accent="teal" data-i18n-aria="acc_teal" data-i18n-title="acc_teal"></button>
+              <button type="button" class="seg-b swatch" data-ui-accent="violet" data-i18n-aria="acc_violet" data-i18n-title="acc_violet"></button>
+            </div>
+          </div>
+          <div class="hint" data-i18n="appearance_note">تُحفظ تلقائيًا في هذا الجهاز، وتُطبق فورًا.</div>
+        </section>
+        <section class="card soft">
+          <div class="section-title" data-i18n="s_maintenance">صيانة سريعة</div>
+          <div class="row gap">
+            <button class="btn ghost sm" id="living-note-btn" type="button" data-i18n="b_living">🧾 ملاحظة الحالة الحية</button>
+            <button class="btn ghost sm" id="backup-btn" type="button" data-i18n="b_backup">🗜 نسخة احتياطية الآن</button>
+          </div>
+          <div class="hint" data-i18n="maintenance_note">الزرّان متاحان أيضاً من ⌘K. الحالة الحية تُلتقط تلقائياً في تشغيلات الوكيل — وهذا للتشغيل اليدوي عند الحاجة.</div>
+        </section>
+      </div>
+      <div class="modal-actions">
+        <button id="save-settings-btn" class="btn primary" data-i18n="b_save">حفظ</button>
+        <button id="close-settings-btn" class="btn ghost" data-i18n="b_close">إغلاق</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ MCP ═══ -->
+  <div id="modal-mcp" class="overlay hidden" role="dialog" aria-modal="true" aria-labelledby="modal-mcp-title">
+    <div class="modal-box wide">
+      <div class="modal-title" id="modal-mcp-title">MCP</div>
+      <div class="hint" data-i18n="mcp_intro">Cortex خادم MCP: ذاكرتك (28 أداة) لأي وكيل خارجي — Claude Code / Codex / OpenCode / هيرمز. والعكس: Cortex يستدعي أدوات خوادم MCP خارجية (كل استدعاء مسودة تحتاج اعتمادك).</div>
+      <div class="row gap pad8">
+        <button id="mcp-test-btn" class="btn sm" type="button" data-i18n="mcp_test_live">اختبر الاتصال الآن</button>
+        <span id="mcp-test-status" class="hint mono"></span>
+      </div>
+      <pre id="mcp-config-display" class="plain-pre"></pre>
+    <div class="row gap"><button id="copy-mcp-btn" class="btn ghost sm" data-i18n="b_copy">نسخ الإعداد</button><span id="mcp-tools-hint" class="hint"></span><button id="mcp-open-tools" class="btn ghost sm" type="button" data-i18n="b_open_tools">اعرض الأدوات</button></div>
+
+      <div class="sec" data-i18n="mcp_general">الاتصال العام — عنوان واحد لأي نظام</div>
+      <div class="row gap pad8">
+        <span id="mcp-url-display" class="hint mono" dir="ltr"></span>
+        <button class="btn ghost sm" type="button" data-copy="#mcp-url-display" data-i18n="b_copy_url">نسخ العنوان</button>
+      </div>
+      <div class="hint" data-i18n="mcp_general_note">أي نظام يدعم MCP عن بُعد يتصل بهذا العنوان مباشرة (بلا مسارات ولا ملفات إعداد). ولمن يدعم stdio فقط: «الكتلة القياسية» أعلاه — نسخ الإعداد.</div>
+      <div class="hint mono" id="mcp-incoming-status" style="padding:2px 0 0"></div>
+      <div class="row gap pad8">
+        <button id="mcp-general-test" class="btn sm" type="button" data-i18n="mcp_general_test">فحص الاتصال العام</button>
+        <span id="mcp-general-test-status" class="hint mono"></span>
+        <button id="mcp-toggle-incoming" class="btn ghost sm" type="button"></button>
+      </div>
+
+      <div class="sec" data-i18n="mcp_external">الاتجاه العكسي — خادم MCP خارجي يستدعيه Cortex (مسودات دائماً)</div>
+      <div id="mcp-external-list" class="stack"></div>
+      <div class="row gap pad8">
+        <input id="mcp-ext-name" class="input sm" placeholder="الاسم" data-i18n-ph="mcp_ext_name" dir="auto" />
+        <input id="mcp-ext-cmd" class="input sm mono" placeholder="command مثل: node / npx" data-i18n-ph="ph_mcp_cmd" dir="ltr" />
+        <input id="mcp-ext-args" class="input sm mono" placeholder="args بمسافات: server.js --flag" data-i18n-ph="ph_mcp_args" dir="ltr" />
+        <button id="mcp-ext-add" class="btn primary sm" type="button" data-i18n="mcp_ext_add">أضف واختبر</button>
+      </div>
+      <div id="mcp-ext-status" class="hint mono pad8"></div>
+
+      <div class="modal-actions"><button id="close-mcp-btn" class="btn ghost" data-i18n="b_close">إغلاق</button></div>
+    </div>
+  </div>
+
+  <!-- ═══ الجلسات ═══ -->
+  <div id="modal-sessions" class="overlay hidden" role="dialog" aria-modal="true" aria-labelledby="modal-sessions-title">
+    <div class="modal-box wide">
+      <div class="modal-title" id="modal-sessions-title" data-i18n="sessions_title">جلسات الوكيل</div>
+      <div id="sessions-list" class="stack"></div>
+      <div class="modal-actions"><button id="close-sessions-btn" class="btn ghost" data-i18n="b_close">إغلاق</button></div>
+    </div>
+  </div>
+
+  <!-- ═══ ربط ذكي ═══
+       قرار المستخدم: الربط مهمة الوكيل — لا نموذج بثلاث قوائم. الوكيل يقترح من
+       التشابه الفعلي (وسوم/روابط/تقاطع مصطلحات)، والمستخدم يعتمد فقط. -->
+  <div id="modal-link" class="overlay hidden" role="dialog" aria-modal="true" aria-labelledby="modal-link-title">
+    <div class="modal-box wide">
+      <div class="modal-title" id="modal-link-title" data-i18n="link_title">ربط ذكي</div>
+      <div class="hint" data-i18n="link_philosophy">الوكيل يقترح من تشابه فعلي (وسوم/روابط/مصطلحات)، والقرار لك — وكل علاقة مسجَّلة بمصدر وثقة وزمن (§7).</div>
+      <div class="row gap pad8">
+        <span class="lbl" data-i18n="link_from">العنصر المختار</span>
+        <span id="link-source-title" class="mono dim">—</span>
+        <span id="link-suggest-count" class="chip mono hidden"></span>
+      </div>
+      <input id="link-search-input" class="input" dir="auto" placeholder="ابحث عن عنصر بالعنوان…" data-i18n-ph="link_ph_search" autocomplete="off" />
+      <div id="link-pick-list" class="tree link-pick"></div>
+      <div class="sec" data-i18n="link_suggest_title">اقتراحات الوكيل</div>
+      <div id="link-suggest-list" class="stack link-suggest"></div>
+      <div id="link-approve-summary" class="banner hidden"></div>
+      <div class="modal-actions">
+        <button id="link-approve-btn" class="btn primary sm" data-i18n="link_approve">اعتمد المحدد</button>
+        <button id="close-link-btn" class="btn ghost" data-i18n="b_close">إغلاق</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════ التطبيق ══════════ -->
+  <div class="app" id="app">
+
+    <header class="topbar">
+      <div class="brand">Cortex<span>.os</span></div>
+      <button id="palette-open-btn" class="omnibox"><span class="omni-ico" aria-hidden="true">⌕</span><span data-i18n="ph_search_all">ابحث في كل شيء…</span><kbd>⌘K</kbd></button>
+      <div class="top-right">
+        <span id="ai-badge" class="chip hidden mono"></span>
+        <button id="new-note-btn" class="icon-btn" data-i18n="b_new_s" data-i18n-title="new_title" title="عنصر جديد">+ جديدة</button>
+        <button id="link-note-btn" class="icon-btn" data-i18n="b_link" data-i18n-title="link_title" title="ربط ذكي">＋ ربط</button>
+        <button id="ai-open-btn" class="icon-btn">✦ <span data-i18n="b_agent">وكيل</span></button>
+        <button id="mcp-btn" class="icon-btn" aria-label="MCP">MCP</button>
+        <button id="sessions-btn" class="icon-btn" aria-label="الجلسات" data-i18n-aria="sessions_title" data-i18n-title="sessions_title" title="الجلسات">🗂</button>
+        <button id="settings-btn" class="icon-btn" aria-label="الإعدادات" data-i18n-aria="settings_title">⚙</button>
+      </div>
+    </header>
+
+    <!-- ─── القائمة الأيقونية ─── -->
+    <nav class="rail" id="rail" aria-label="التنقل الرئيسي" data-i18n-aria="aria_rail">
+      <button class="rail-btn" data-view="notes"><span class="rail-ico" aria-hidden="true">▤</span><span class="rail-lbl" data-i18n="v_knowledge">المعرفة</span></button>
+      <button class="rail-btn" data-view="graph"><span class="rail-ico" aria-hidden="true">◉</span><span class="rail-lbl" data-i18n="v_graph">الخريطة</span></button>
+      <button class="rail-btn" data-view="monitor"><span class="rail-ico" aria-hidden="true">▥</span><span class="rail-lbl" data-i18n="v_monitor">المراقبة</span></button>
+      <button class="rail-btn" data-view="repos"><span class="rail-ico" aria-hidden="true">⬡</span><span class="rail-lbl" data-i18n="v_repos">المستودعات</span></button>
+      <button class="rail-btn" data-view="providers"><span class="rail-ico" aria-hidden="true">⚡</span><span class="rail-lbl" data-i18n="v_providers">المزودون</span></button>
+      <button class="rail-btn" data-view="import"><span class="rail-ico" aria-hidden="true">↧</span><span class="rail-lbl" data-i18n="v_import">الاستيراد</span></button>
+      <button class="rail-btn" data-view="tools"><span class="rail-ico" aria-hidden="true">⊞</span><span class="rail-lbl" data-i18n="v_tools">الأدوات</span></button>
+      <button class="rail-btn" data-view="governance"><span class="rail-ico" aria-hidden="true">⚖</span><span class="rail-lbl" data-i18n="v_governance">الحُكم</span></button>
+      <div class="rail-spacer"></div>
+      <!-- «حالة حية» و«نسخة» انتقلتا إلى نافذة الإعدادات (2026-10-30): وظيفتان
+           صيانيتان متاحتان أصلاً في ⌘K — لا مكانهما الشريط اليومي. -->
+    </nav>
+
+    <!-- ─── منطقة العمل ─── -->
+    <main class="work" id="work" tabindex="-1">
+
+      <!-- ① المعرفة -->
+      <section class="view on" id="view-notes">
+        <div class="view-head">
+          <h1 class="view-title" id="library-title" data-i18n="v_knowledge">المعرفة</h1>
+          <div class="view-tools">
+            <input id="notes-search" class="field field-sm" type="search" placeholder="ابحث في العنوان…" data-i18n-ph="ph_search_library">
+            <select id="notes-type" class="field field-sm">
+              <option value="" data-i18n="opt_all_types">كل الأنواع</option>
+              <option value="project" data-i18n="tp_projects">مشاريع</option>
+              <option value="doc" data-i18n="tp_docs">مستندات</option>
+              <option value="decision" data-i18n="tp_decisions">قرارات</option>
+              <option value="task" data-i18n="tp_tasks">مهام</option>
+              <option value="meeting" data-i18n="tp_meetings">اجتماعات</option>
+            </select>
+            <button id="notes-clear" class="btn ghost sm" type="button" hidden data-i18n="b_clear_filter">مسح الفلتر</button>
+          <!-- تصدير المشروع (2026-11-06): المسار كان خلفياً بلا أي سطح -->
+            <span id="notes-count" class="count-chip">0</span>
+          <button id="export-project-btn" class="icon-btn" type="button" data-i18n-aria="b_export_project" data-i18n-title="export_title" title="تصدير المشروع الحالي كملف ماركداون" aria-label="تصدير">↥</button>
+          </div>
+        </div>
+
+        <!-- اسأل مكتبتك (2026-11-15): جواب من معرفتك بمصادر مرقّمة، أو «لا أعرف» صريحة -->
+        <details class="card soft" id="ask-sec">
+          <summary class="section-title sum-toggle">
+            <span data-i18n="ask_title">اسأل مكتبتك</span>
+            <span class="chip mono" data-i18n="ask_chip">بمصادر · أو «لا أعرف»</span>
+          </summary>
+          <form id="ask-form" class="row gap" style="margin-top:8px">
+            <input id="ask-input" class="input grow" placeholder="ماذا قررت في مشروع…؟" data-i18n-ph="ask_ph" dir="auto" required>
+            <button id="ask-submit" class="btn primary sm" type="submit" data-i18n="ask_btn">اسأل</button>
+          </form>
+          <div id="ask-out" class="stack" style="margin-top:8px"></div>
+        </details>
+        <div id="empty-state" class="empty hidden">
+          <div class="empty-mark">◇</div>
+          <h2 data-i18n="empty_h">عقلك المعرفي فارغ الآن</h2>
+          <p class="dim" data-i18n="empty_p">أنشئ أول عنصر، أو اضغط ⌘K وابدأ الكتابة. كل ما تكتبه يصبح ذاكرة.</p>
+          <button id="empty-new-btn" class="btn primary" data-i18n="b_first">ابدأ بعنصر جديد</button>
+        </div>
+
+        <section id="doc" class="doc hidden">
+          <div class="doc-bar" id="doc-bar">
+            <input id="note-title" class="title-input" dir="auto" placeholder="العنوان…" data-i18n-ph="ph_title_ellipsis" />
+            <!-- تصنيف خلف بادج واحد (2026-10-30، نقد «الحقول المربكة»): النوع/المشروع/الأهمية
+                 يستنتجها الوكيل (classifyNote) — وتُعدَّل يدوياً عند الطلب فقط. -->
+            <button class="ctxb" id="doc-meta-toggle" type="button" data-i18n-title="meta_edit_hint"><span data-i18n="b_meta">تصنيف</span> <b class="mono" id="doc-meta-summary">—</b></button>
+            <span id="doc-meta-fields" class="doc-meta-fields hidden">
+              <select id="type-select" class="sel sm">
+                <option value="note" data-i18n="t_note">ملاحظة</option>
+                <option value="doc" data-i18n="t_doc">مستند</option>
+                <option value="project" data-i18n="t_project">مشروع</option>
+                <option value="decision" data-i18n="t_decision">قرار</option>
+                <option value="task" data-i18n="t_task">مهمة</option>
+                <option value="meeting" data-i18n="t_meeting">اجتماع</option>
+                <option value="procedure" data-i18n="t_procedure">إجراء</option>
+                <option value="state" data-i18n="t_state">حالة</option>
+                <option value="living_note" data-i18n="t_living">حالة حية</option>
+              </select>
+              <input id="project-input" class="input sm" dir="auto" placeholder="المشروع" data-i18n-ph="ph_project" />
+              <div class="seg" id="editor-importance-seg">
+                <button type="button" class="seg-b" data-ui-importance="1" data-i18n="imp_normal">عادي</button>
+                <button type="button" class="seg-b" data-ui-importance="3" data-i18n="imp_important">مهم</button>
+                <button type="button" class="seg-b" data-ui-importance="5" data-i18n="imp_critical">حرِج</button>
+              </div>
+              <input id="editor-importance-input" type="hidden" value="1" />
+            </span>
+            <button id="save-note-btn" class="btn primary sm" data-i18n="b_save">حفظ</button>
+            <span id="doc-save-state" class="hint mono"></span>
+            <button id="delete-note-btn" class="btn ghost sm" data-i18n="b_delete">حذف</button>
+          </div>
+          <div id="note-meta-line" class="crumbs mono" dir="auto"></div>
+          <div id="editor-tabs" class="view-pills">
+            <button class="vpill on" data-mode="edit" data-i18n="v_edit">تحرير</button>
+            <button class="vpill" data-mode="preview" data-i18n="v_preview">معاينة</button>
+          </div>
+          <div id="editor-stack" class="editor-stack">
+            <textarea id="note-content" class="editor-textarea" dir="auto" spellcheck="false"></textarea>
+            <div id="note-preview" class="pane-read"></div>
+          </div>
+          <div class="ctxbar">
+            <!-- زر واحد بدل خمسة عدّادات (2026-10-30، نقد «خمس لوحات لعنصر واحد»):
+                 المهام/المرتبطات/الروابط/السجل/الثقة تُفتح عند الطلب في اللوحة نفسها. -->
+            <button class="ctxb" id="ctx-details-toggle"><span data-i18n="c_details">تفاصيل العنصر</span></button>
+          </div>
+          <div id="ctx-panels" class="ctx-panels hidden">
+            <div class="ctx-col" id="ctx-tasks"></div>
+            <div class="ctx-col" id="ctx-related"></div>
+            <div class="ctx-col" id="ctx-backlinks"></div>
+            <div class="ctx-col" id="ctx-history"></div>
+            <div class="ctx-col" id="ctx-state"><div class="hint" id="ctx-state-count">—</div></div>
+            <div class="ctx-col" id="ctx-confidence"></div>
+          </div>
+        </section>
+
+        <div class="sidebar">
+          <!-- ترتيب 2026-10-30 (نقد «الأقسام المتراكمة والحقول المربكة»): المكتبة أولاً —
+               هي الجوهر ولا يدفنها شيء. «حلّ المقصود» أُزيل كحقل غامض: نفس الجملة («افتح
+               المستند») تُقال للوكيل في المحادثة فيحلّها. «أقوى الكيانات» انتقلت للمراقبة. -->
+          <div class="side-block grow">
+            <div class="sec" data-i18n="s_library">المكتبة</div>
+            <div id="library-list" class="tree"></div>
+          </div>
+          <div class="side-block">
+            <div class="sec" data-i18n="s_projects">المشاريع</div>
+            <div id="projects-list" class="tree"></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ② الخريطة -->
+      <section class="view" id="view-graph">
+        <div class="view-head">
+          <h1 class="view-title" data-i18n="v_graph_h">خريطة الترابط</h1>
+          <div class="view-tools">
+            <span id="graph-info" class="hint mono"></span>
+          </div>
+        </div>
+        <!-- خريطة «من يعتمد على من» — نظام FileMap: مركز + عمودان + شريط أرقام (بلا عقد فيزيائية) -->
+        <div id="filemap-root"></div>
+      </section>
+
+      <!-- ③ الوكيل: سطح واحد — اللوحة الجانبية ✦ (قرار المستخدم 2026-10-27: لا شاشات متعددة) -->
+
+      <!-- ④ المراقبة -->
+      <section class="view" id="view-monitor">
+        <div class="view-head">
+          <h1 class="view-title" data-i18n="v_monitor_h">مراقبة الإنتاجية</h1>
+          <div class="view-tools">
+            <button id="mon-refresh" class="btn ghost sm" type="button" data-i18n="b_refresh">تحديث</button>
+            <span id="mon-updated" class="hint mono">—</span>
+          </div>
+        </div>
+        <div class="cards" id="mon-cards">
+          <div class="card soft"><div class="card-k" data-i18n="k_verdict">حكم المراقب</div><div class="card-v" id="mon-verdict">—</div></div>
+          <div class="card soft"><div class="card-k" data-i18n="k_tasks">المهام</div><div class="card-v" id="mon-steps">0</div></div>
+          <div class="card soft"><div class="card-k" data-i18n="k_done">نُفّذت</div><div class="card-v ok" id="mon-ok">0</div></div>
+          <div class="card soft"><div class="card-k" data-i18n="k_failed">فشلت</div><div class="card-v bad" id="mon-fail">0</div></div>
+          <div class="card soft"><div class="card-k" data-i18n="k_success">نجاح</div><div class="card-v" id="mon-avg">—</div></div>
+          <div class="card soft"><div class="card-k" data-i18n="k_parallel">توازٍ مُنجَز</div><div class="card-v" id="mon-parallel">0</div></div>
+          <div class="card soft"><div class="card-k" data-i18n="k_duration">متوسط الزمن</div><div class="card-v" id="mon-dur">—</div></div>
+        </div>
+
+        <!-- ── في غيابي: الوكيل يعمل دونك — مهام مجدولة + سجل نبضات (نُقلت من شاشة الوكيل 2026-10-30: شاشة الوكيل محادثة لا لوحة تحكم) ── -->
+        <div id="agent-bg-pane" class="agent-panes">
+          <details class="card soft agent-sec" id="agent-sched-sec">
+            <summary class="section-title sum-toggle">
+              <span data-i18n="sched_title">المهام المجدولة</span>
+              <span id="sched-hours" class="chip mono">—</span>
+            </summary>
+            <div class="row gap" style="margin:6px 0">
+              <button id="sched-refresh" class="btn ghost sm" type="button" data-i18n="b_refresh">تحديث</button>
+            </div>
+            <div class="hint" data-i18n="sched_hint">هدف + كل كم ساعة ⇒ الوكيل يشغّله وحده ويسجّل نبضه. النتائج في سجل النبضات أدناه.</div>
+            <div id="sched-list" class="stack"></div>
+            <form id="sched-form" class="row gap sched-add">
+              <input id="sched-goal" class="input grow" dir="auto" placeholder="هدف يعمل دونك… مثال: حدّث ذاكرة المشروع ولخّص المستجدات" data-i18n-ph="ph_sched_goal" required>
+              <label class="lbl sched-every"><span data-i18n="sched_every_lbl">كل كم ساعة</span>
+                <input id="sched-every" class="input sm" type="number" min="0.25" max="720" step="0.25" value="6"></label>
+              <button id="sched-add" class="btn primary sm" type="submit" data-i18n="sched_add">أضف مهمة</button>
+            </form>
+            <div id="sched-status" class="hint mono"></div>
+          </details>
+          <details class="card soft agent-sec" id="agent-ticks-sec">
+            <summary class="section-title sum-toggle" data-i18n="ticks_title">سجل النبضات</summary>
+            <div id="ticks-list" class="stack"></div>
+          </details>
+          <!-- أقوى الكيانات (إحصاء تحليلي) — انتقلت من جانب شاشة المعرفة (2026-10-30):
+               مقعد الكتابة لا يحمل لوحات إحصاء. -->
+          <details class="card soft agent-sec" id="agent-entities-sec">
+            <summary class="section-title sum-toggle" data-i18n="s_entities">أقوى الكيانات</summary>
+            <div id="entities-list" class="chips"></div>
+          </details>
+        </div>
+
+        <div class="view-tools" style="padding:0 16px 10px">
+          <select id="mon-run" class="field field-md"><option value="" data-i18n="opt_last_run">آخر تشغيل</option></select>
+          <span id="mon-reasons" class="hint"></span>
+            <div id="mon-advice" class="stack"></div>
+        </div>
+
+        <div class="sec" data-i18n="s_objections">اعتراضات المراقب الصارم</div>
+        <div id="mon-objections" class="stack" style="padding:0 16px 12px"></div>
+
+        <div class="sec" data-i18n="s_recent_tasks">آخر المهام</div>
+        <div class="table-wrap"><table class="table" id="mon-tasks">
+          <thead><tr><th data-i18n="th_task">المهمة</th><th data-i18n="th_owner">الصاحب</th><th data-i18n="th_status">الحالة</th><th data-i18n="th_project">المشروع</th><th data-i18n="th_due">الموعد</th></tr></thead>
+          <tbody id="sp-tasks"></tbody>
+        </table></div>
+        <div class="two-col">
+          <div><div class="sec" data-i18n="s_suggested">الخطوات المقترحة</div><div id="sp-actions"></div></div>
+          <div><div class="sec" data-i18n="s_gaps">الفجوات</div><div id="sp-gaps"></div></div>
+        </div>
+        <div class="sp-timeline"><div class="sec" data-i18n="s_timeline">خط الصحة عبر الزمن (SQLite)</div><div id="sp-healthbars" class="hbrow"></div></div>
+        <div id="state-pane" class="state-pane hidden"></div>
+        <div class="sp-head">
+          <div class="scorebox"><div class="bignum" id="sp-health">—</div><div class="hint" data-i18n="l_health">صحة المشروع</div></div>
+          <div class="sp-title"><div id="sp-project" class="mono dim"></div><div class="bignum-sm" id="sp-summary"></div></div>
+        </div>
+        <div class="sp-grid">
+          <div class="sp-cell"><div class="sec" data-i18n="s_steps">الخطوات</div><div id="q-next"></div></div>
+          <div class="sp-cell"><div class="sec" data-i18n="g_contr">تناقضات</div><div id="q-contradictions"></div></div>
+          <div class="sp-cell"><div class="sec" data-i18n="s_open_tasks2">مهام مفتوحة</div><div id="q-tasks"></div></div>
+          <div class="sp-cell"><div class="sec" data-i18n="s_kgaps">فجوات المعرفة</div><div id="q-gaps"></div></div>
+        </div>
+      </section>
+
+      <!-- ⑤ المستودعات -->
+      <section class="view" id="view-repos">
+        <div class="view-head">
+          <h1 class="view-title" data-i18n="v_repos">المستودعات</h1>
+          <div class="view-tools">
+            <input id="repo-path" class="input sm" placeholder="مسار داخل مساحة العمل…" data-i18n-ph="ph_repo_path" dir="auto">
+            <button id="repo-index" class="btn primary sm" type="button" data-i18n="b_index">فهرسة</button>
+          </div>
+        </div>
+        <div id="repo-status" class="banner hidden"></div>
+        <!-- ذاكرة الوكيل (2026-11-13): ما فهرسه الوكيل فعلاً — لا نموذج إدخال فارغ -->
+        <div id="repo-saved" class="stack"></div>
+        <!-- حالة الفراغ (2026-11-06): كان القسم 51 حرفاً بلا أي إرشاد قبل أول فهرسة -->
+        <div id="repo-hint" class="hint" data-i18n="repo_empty_hint">لا مستودع مفهرس بعد — أدخل مساراً داخل مساحة العمل واضغط «فهرسة».</div>
+        <div class="split2">
+          <div>
+            <div class="sec"><span data-i18n="s_files">محتوى المستودع</span> <span id="repo-file-count" class="mono dim">0</span></div>
+            <div id="repo-files" class="tree"></div>
+          </div>
+          <div>
+            <div class="sec" data-i18n="s_deps">الترابط</div>
+            <div id="repo-deps" class="stack"></div>
+            <div class="sec" data-i18n="s_impact">أثر التغيير</div>
+            <div class="resolver-row">
+              <input id="impact-file" class="input" placeholder="ملف…" data-i18n-ph="ph_file" dir="auto">
+              <button id="impact-run" class="minibtn" type="button" data-i18n="b_analyze">حلّل</button>
+            </div>
+            <div id="impact-list" class="stack"></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ⑥ المزودون -->
+      <section class="view" id="view-providers">
+        <div class="view-head">
+          <h1 class="view-title" data-i18n="v_providers_h">مزودو الذكاء</h1>
+        </div>
+        <p class="hint" data-i18n="providers_single_home">المكان الوحيد لإدارة المزوّدين: الإضافة، الفحص، اختيار النموذج، التفعيل، الحذف.</p>
+        <div id="provider-count" class="sec"></div>
+        <div id="provider-list" class="stack"></div>
+        <!-- مطويّ افتراضياً (2026-11-13): كان النموذج ثابتاً يحتل الشاشة ويحجب
+             قائمة المزوّدين — والمستخدم يرى «لا مزودين» وهو لا يراها. -->
+        <details id="add-provider-card" class="card soft">
+          <summary class="section-title sum-toggle" data-i18n="s_add_provider">إضافة مزود سحابي</summary>
+          <form id="add-provider-form">
+            <label class="lbl"><span data-i18n="l_name">الاسم</span><input id="ap-name" class="input" placeholder="Inception Labs" dir="auto" required></label>
+            <label class="lbl"><span data-i18n="l_base_url">العنوان (Base URL)</span><input id="ap-url" class="input" placeholder="https://api.example.com/v1" dir="ltr" required></label>
+            <label class="lbl"><span data-i18n="l_api_key">مفتاح API</span><input id="ap-key" class="input" type="password" placeholder="sk-…" dir="ltr"></label>
+            <label class="lbl"><span data-i18n="l_model_id">معرّف النموذج (اختياري — للحالات التي يقفل فيها المزود الاكتشاف)</span><input id="ap-model" class="input" placeholder="deepseek-v4.1-flash:free" dir="ltr" /></label>
+            <div class="row gap">
+              <button id="ap-test" class="btn ghost sm" type="button" data-i18n="b_test_conn">اختبر الاتصال</button>
+              <button id="ap-save" class="btn primary sm" type="submit" data-i18n="b_save" disabled>حفظ</button>
+              <span id="ap-status" class="hint mono"></span>
+            </div>
+          </form>
+          <!-- النماذج لا تُعرض إلا بعد فحص ناجح، ويختار منها المستخدم قبل الحفظ -->
+          <div id="ap-models-wrap" class="hidden">
+            <div class="sec" data-i18n="s_pick_model">النماذج المجلوبة — اختر واحداً ثم احفظ</div>
+            <div id="ap-models" class="mchips"></div>
+          </div>
+        </details>
+      </section>
+
+      <!-- ⑦ الاستيراد: الفعل أولاً ثم الكتالوج مضغوطاً (عطل مقاس: الكتالوج كان يملأ الشاشة) -->
+      <section class="view" id="view-import">
+        <div class="view-head">
+          <h1 class="view-title" data-i18n="v_import">الاستيراد</h1>
+        </div>
+        <section class="card soft">
+          <div class="section-title" data-i18n="s_import_file">استيراد ملف أو مجلد أو صفحة</div>
+          <form id="import-form">
+            <label class="lbl"><span data-i18n="l_path">المسار أو الرابط</span><input id="import-path" class="input" placeholder="docs/notes.md — أو مجلد — أو https://…" dir="auto" required data-i18n-ph="ph_import_path">
+              <span class="hint" data-i18n="imp_folder_hint">مسار مجلد ⇒ يُستورَد كل ما فيه · رابط https ⇒ يُجلَب كصفحة ويب</span></label>
+            <label class="lbl"><span data-i18n="l_format">الصيغة</span><select id="import-format" class="input sel"><option value="" data-i18n="opt_autodetect">كشف تلقائي</option></select></label>
+            <div class="row gap">
+          <label class="lbl"><span data-i18n="l_project">المشروع</span><input id="import-project" class="input" dir="auto" placeholder="المشروع" data-i18n-ph="ph_project"></label>
+              <button id="import-submit" class="btn primary sm" type="submit" data-i18n="b_import">استورد</button>
+            <button id="import-preview-btn" class="btn ghost sm" type="button" data-i18n="src_preview_btn">معاينة التصنيف</button>
+              <span id="import-status" class="hint mono"></span>
+            </div>
+          </form>
+        <div id="import-preview-out" class="stack"></div>
+        </section>
+        <!-- ما استُورد فعلاً (2026-11-13): كان 311 سجلاً في القاعدة بلا أي مرآة -->
+        <section class="card soft">
+          <div class="sec"><span data-i18n="s_imported_docs">ما استُورد</span> <span id="imports-count" class="mono dim"></span></div>
+          <div id="imports-list" class="stack"></div>
+        </section>
+        <div id="import-result" class="banner hidden"></div>
+        <details class="import-catalog">
+          <summary data-i18n="s_formats_supported">الصيغ المدعومة</summary>
+          <div class="fmt-chips" id="import-formats"></div>
+        </details>
+      </section>
+
+      <!-- ⑧ الأدوات الخارجية — كل شيء قابل للطيّ (2026-11-13): كانت ثلاث كتل
+           ثابتة تملأ الشاشة. الآن أقسام مطويّة تعرض أعدادها في العنوان. -->
+      <section class="view" id="view-tools">
+        <div class="view-head">
+          <h1 class="view-title" data-i18n="v_tools_h">الأدوات الخارجية</h1>
+          <div class="view-tools"><button id="mcp-refresh" class="btn ghost sm" type="button" data-i18n="b_refresh">تحديث</button></div>
+        </div>
+
+        <details class="card soft" id="mcp-servers-sec" open>
+          <summary class="section-title sum-toggle">
+            <span data-i18n="s_mcp_servers">خوادم MCP</span>
+            <span id="mcp-servers-count" class="chip mono">—</span>
+          </summary>
+          <div id="mcp-servers" class="stack"></div>
+        </details>
+
+        <details class="card soft" id="mcp-tools-sec">
+          <summary class="section-title sum-toggle">
+            <span data-i18n="s_available_tools">الأدوات المتاحة</span>
+            <span id="tools-count" class="chip mono">—</span>
+          </summary>
+          <div id="mcp-tools-grid2" class="tools-grid"></div>
+          <div class="tools-note" data-i18n="tools_note">هذه أدوات خادم الذاكرة (MCP) المتاحة للوكلاء الخارجيين — كل استدعاء يمرّ ببوابة الصلاحيات ويُسجَّل في التدقيق، والكتابة تبقى مسودات معتمدة.</div>
+        </details>
+
+        <details class="card soft" id="mcp-add-sec">
+          <summary class="section-title sum-toggle">
+            <span data-i18n="s_add_mcp">إضافة خادم MCP</span>
+            <span class="chip mono" data-i18n="chip_verified_add">يُفحص قبل الحفظ</span>
+          </summary>
+          <form id="mcp-add-form" class="stack" style="margin-top:8px">
+            <label class="lbl"><span data-i18n="l_mcp_name">الاسم</span><input id="mcp-add-name" class="input" placeholder="github-mcp" dir="ltr" required></label>
+            <label class="lbl"><span data-i18n="l_mcp_cmd">الأمر</span><input id="mcp-add-cmd" class="input mono" placeholder="npx / node / uvx" dir="ltr" required></label>
+            <label class="lbl"><span data-i18n="l_mcp_args">الوسائط (بمسافات)</span><input id="mcp-add-args" class="input mono" placeholder="-y @modelcontextprotocol/server-github" dir="ltr"></label>
+            <div class="row gap">
+              <button id="mcp-add-submit" class="btn primary sm" type="submit" data-i18n="b_verify_add">افحص وأضف</button>
+              <span id="mcp-add-status" class="hint mono"></span>
+            </div>
+          </form>
+        </details>
+
+        <!-- الخزنة (2026-11-15): افتح خزنة Obsidian قائمة بلا نسخ -->
+        <details class="card soft" id="vault-sec">
+          <summary class="section-title sum-toggle">
+            <span data-i18n="vault_title">الخزنة</span>
+            <span id="vault-chip" class="chip mono">—</span>
+          </summary>
+          <div class="stack" style="margin-top:8px">
+            <div class="hint mono" id="vault-path" dir="ltr">—</div>
+            <div class="row gap" style="flex-wrap:wrap">
+              <input id="vault-input" class="input grow" placeholder="C://Users//you//Documents//MyVault" dir="ltr">
+              <button id="vault-save" class="btn primary sm" type="button" data-i18n="vault_set">افتح هذا المجلد</button>
+              <button id="vault-reset" class="btn ghost sm" type="button" data-i18n="vault_reset">الافتراضي</button>
+            </div>
+            <div class="hint" data-i18n="vault_note">التغيير يُطبَّق بعد إعادة تشغيل التطبيق. المجلدات الفرعية تُقرأ، و‎.obsidian‎ يُتجاهل، و‎[[الروابط]]‎ تُقرأ كما هي.</div>
+            <div id="vault-status" class="hint mono"></div>
+          </div>
+        </details>
+
+        <!-- ربط وكيل خارجي (2026-11-15): سطر واحد يُنسخ، وقراءة فقط افتراضياً -->
+        <details class="card soft" id="mcp-link-sec">
+          <summary class="section-title sum-toggle">
+            <span data-i18n="mcplink_title">ربط وكيل خارجي</span>
+            <span id="mcplink-chip" class="chip mono">MCP</span>
+          </summary>
+          <div class="stack" style="margin-top:8px">
+            <div class="hint" data-i18n="mcplink_note">انسخ سطرًا واحدًا في Claude Code أو Cursor — يقرأ من نفس الخزنة.</div>
+            <label class="lbl"><span data-i18n="mcplink_cmd">Claude Code</span>
+              <div class="row gap"><input id="mcplink-claude" class="input mono grow" readonly dir="ltr"><button class="btn ghost sm" type="button" data-copy="mcplink-claude" data-i18n="b_copy">نسخ</button></div>
+            </label>
+            <label class="lbl"><span data-i18n="mcplink_json">JSON (Cursor / أي عميل)</span>
+              <div class="row gap"><input id="mcplink-json" class="input mono grow" readonly dir="ltr"><button class="btn ghost sm" type="button" data-copy="mcplink-json" data-i18n="b_copy">نسخ</button></div>
+            </label>
+            <label class="row gap" style="align-items:center">
+              <input id="mcplink-readonly" type="checkbox" checked>
+              <span data-i18n="mcplink_ro">قراءة فقط (موصى به)</span>
+            </label>
+            <div id="mcplink-status" class="hint mono"></div>
+          </div>
+        </details>
+
+        <details class="card soft" id="skill-add-sec">
+          <summary class="section-title sum-toggle">
+            <span data-i18n="s_add_skill">إضافة مهارة</span>
+            <span class="chip mono" data-i18n="chip_skill_caps">وصف ≤300 · جسم ≤6000</span>
+          </summary>
+          <form id="skill-add-form" class="stack" style="margin-top:8px">
+            <label class="lbl"><span data-i18n="l_skill_name">الاسم</span><input id="skill-add-name" class="input mono" placeholder="my-skill" dir="ltr" required></label>
+            <label class="lbl"><span data-i18n="l_skill_desc">الوصف (ما يراه الوكيل)</span><input id="skill-add-desc" class="input" placeholder="استخدم عند…" data-i18n-ph="ph_skill_desc" dir="auto" maxlength="300" required></label>
+            <label class="lbl"><span data-i18n="l_skill_body">الجسم — الخطوات</span><textarea id="skill-add-body" class="input" rows="6" dir="auto" maxlength="6000" placeholder="1. …&#10;2. …" required></textarea></label>
+            <div class="row gap">
+              <button id="skill-add-submit" class="btn primary sm" type="submit" data-i18n="b_verify_add">افحص وأضف</button>
+              <span id="skill-add-status" class="hint mono"></span>
+            </div>
+          </form>
+        </details>
+
+        <details class="card soft agent-sec" id="agent-skills-sec">
+          <summary class="section-title sum-toggle">
+            <span data-i18n="skills_title">المهارات</span>
+            <span id="skills-count" class="chip mono">—</span>
+          </summary>
+          <div id="skills-list"></div>
+        </details>
+      </section>
+      </section>
+
+      <!-- ⑨ الحُكم: طقوس المراحل والبوايات والحكم -->
+      <section class="view" id="view-governance">
+        <div class="view-head">
+          <h1 class="view-title" data-i18n="v_governance">الحُكم</h1>
+          <div class="view-tools">
+            <span id="gov-release-badge" class="gov-badge gov-badge-idle" data-i18n="unchecked">لم يُفحص</span>
+            <button id="gov-refresh" class="btn ghost sm" type="button" data-i18n="b_refresh">تحديث</button>
+            <span id="gov-updated" class="hint mono">—</span>
+          </div>
+        </div>
+        <div id="gov-error" class="banner bad hidden"></div>
+
+        <!-- تبويبات داخلية (2026-11-06): القسم كان 9 بطاقات في عمود واحد بلا تنقّل.
+             تبقى شاشة واحدة في الشريط — التنقّل داخلها. -->
+        <div class="seg gov-tabs" id="gov-tabs" role="tablist" aria-label="أقسام الحُكم" data-i18n-aria="aria_gov_tabs">
+          <button class="seg-b on" type="button" role="tab" aria-selected="true" data-gov-tab="stages" data-i18n="gov_tab_stages">المراحل والبوابات</button>
+          <button class="seg-b" type="button" role="tab" aria-selected="false" data-gov-tab="quality" data-i18n="gov_tab_quality">الجودة والتقييم</button>
+          <button class="seg-b" type="button" role="tab" aria-selected="false" data-gov-tab="safety" data-i18n="gov_tab_safety">الحجر والأثر</button>
+          <button class="seg-b" type="button" role="tab" aria-selected="false" data-gov-tab="relations" data-i18n="gov_tab_rel">العلاقات</button>
+          <button class="seg-b" type="button" role="tab" aria-selected="false" data-gov-tab="privacy" data-i18n="gov_tab_privacy">الخصوصية والاتصالات</button>
+        </div>
+
+        <div class="gov-scroll" id="gov-scroll">
+
+          <!-- ① طقوس المراحل الثماني -->
+          <section class="card soft gov-card" data-gov-tab="stages">
+            <div class="section-title" data-i18n="gov_stages_title">طقوس المراحل الثماني</div>
+            <div class="row gap gov-line">
+              <span class="hint" data-i18n="gov_proven">المُثبتة</span><b id="gov-stages-proven" class="mono gov-num">0</b>
+              <span class="hint" data-i18n="gov_of">من</span><b id="gov-stages-total" class="mono gov-num">8</b>
+              <span class="hint" data-i18n="gov_next_stage">• المرحلة التالية</span><b id="gov-stages-next" class="mono">—</b>
+              <span id="gov-stages-badge" class="gov-badge gov-badge-idle">—</span>
+            </div>
+            <div id="gov-stages" class="gov-list"></div>
+          </section>
+
+          <!-- ② بوابات منع الإطلاق الثماني -->
+          <section class="card soft gov-card" data-gov-tab="stages">
+            <div class="section-title" data-i18n="gov_gates_title">بوابات منع الإطلاق الثماني</div>
+            <div class="row gap gov-line">
+              <span id="gov-gates-release" class="gov-badge gov-badge-idle" data-i18n="unchecked">لم يُفحص</span>
+              <button id="gov-gates-check" class="btn primary sm" type="button" data-i18n="b_gates_check">افحص البوابات الآن</button>
+              <span id="gov-gates-hint" class="hint"></span>
+            </div>
+            <div id="gov-gates" class="gov-list"></div>
+          </section>
+
+          <!-- ③ الاستهلاك -->
+          <section class="card soft gov-card" data-gov-tab="privacy">
+            <div class="section-title" data-i18n="gov_usage_title">الاستهلاك</div>
+            <div id="gov-usage" class="gov-metrics"></div>
+            <div class="hint" data-i18n="gov_usage_note">التكلفة غير المعروفة تُعرض <b>عدداً</b> لنداءات مجهولة التكلفة — لا تُخمَّن تكلفة مطلقاً.</div>
+          </section>
+
+          <!-- ④ سياسة الخصوصية وسجل الاتصالات -->
+          <section class="card soft gov-card" data-gov-tab="privacy">
+            <div class="section-title" data-i18n="gov_privacy_title">الخصوصية وسجل الاتصالات</div>
+            <div class="sec" data-i18n="gov_s_privacy">سياسة الخصوصية</div>
+            <div id="gov-privacy" class="gov-note">—</div>
+            <div class="sec" data-i18n="gov_s_connections">سجل الاتصالات</div>
+            <div id="gov-connections" class="gov-list"></div>
+          </section>
+
+          <!-- ⑤ التقييم الذاتي -->
+          <section class="card soft gov-card" data-gov-tab="quality">
+            <div class="section-title" data-i18n="gov_eval_title">التقييم الذاتي</div>
+            <div id="gov-eval-metrics" class="gov-metrics"></div>
+            <div class="sec" data-i18n="gov_s_weakness">الضعف المرصود</div>
+            <div id="gov-weaknesses" class="gov-list"></div>
+            <div class="sec" data-i18n="gov_s_proposals">المقترحات</div>
+            <div id="gov-proposals" class="gov-list"></div>
+          </section>
+
+          <!-- ⑥ الحجر -->
+          <section class="card soft gov-card" data-gov-tab="safety">
+            <div class="section-title" data-i18n="gov_quarantine_title">الحجر</div>
+            <div id="gov-quarantine-stats" class="gov-metrics"></div>
+            <div id="gov-quarantine" class="gov-list"></div>
+          </section>
+
+          <!-- ⑦ سلامة التدقيق -->
+          <section class="card soft gov-card" data-gov-tab="privacy">
+            <div class="section-title" data-i18n="gov_audit_title">سلامة التدقيق</div>
+            <div class="row gap gov-line">
+              <span id="gov-audit-badge" class="gov-badge gov-badge-idle">—</span>
+              <span id="gov-audit-detail" class="hint mono"></span>
+            </div>
+          </section>
+
+          <!-- ⑧ تغطية أنواع العلاقات التسعة -->
+          <section class="card soft gov-card" data-gov-tab="relations">
+            <div class="section-title" data-i18n="gov_relations_title">تغطية أنواع العلاقات التسعة</div>
+            <!-- سطران لا سطر (2026-11-14): الملخّص صار يحمل خمسة أرقام، وحشره
+                 مع زرّين كان يزاحم النص ويقصّه. الملخّص سطر، والأفعال سطر. -->
+            <div class="row gap gov-line">
+              <span id="gov-rel-summary" class="hint mono" style="white-space:normal;line-height:1.9"></span>
+            </div>
+            <div class="row gap gov-line">
+              <button id="gov-rel-infer" class="btn primary sm" type="button" data-i18n="b_rel_infer">استنتج العلاقات</button>
+              <button id="gov-sev-derive" class="btn ghost sm" type="button" data-i18n="b_sev_derive">اشتق الخطورة</button>
+              <span id="gov-rel-hint" class="hint" style="white-space:normal"></span>
+            </div>
+            <div id="gov-relations" class="gov-grid"></div>
+          </section>
+
+          <!-- ⑨ التراجع -->
+          <section class="card soft gov-card" data-gov-tab="safety">
+            <div class="section-title" data-i18n="gov_rollback_title">التراجع</div>
+            <div class="row gap gov-line">
+              <span id="gov-rollback-stats" class="hint mono"></span>
+              <button id="gov-rollback-verify" class="btn primary sm" type="button" data-i18n="b_rb_verify">أثبت التراجع</button>
+              <span id="gov-rollback-badge" class="gov-badge gov-badge-idle">—</span>
+              <span id="gov-rollback-hint" class="hint"></span>
+            </div>
+            <div id="gov-rollback-steps" class="gov-steps"></div>
+            <div id="gov-rollback" class="gov-list"></div>
+          </section>
+
+          <!-- ⑩ النسخ الاحتياطي والاستعادة (2026-11-15) -->
+          <section class="card soft gov-card" data-gov-tab="safety">
+            <div class="section-title" data-i18n="gov_backup_title">النسخ الاحتياطي والاستعادة</div>
+            <div class="row gap gov-line">
+              <button id="gov-backup-now" class="btn primary sm" type="button" data-i18n="b_backup_now">أنشئ نسخة الآن</button>
+              <span id="gov-backup-hint" class="hint"></span>
+            </div>
+            <div id="gov-backups" class="gov-list"></div>
+          </section>
+
+        </div>
+      </section>
+
+    </main>
+
+    <!-- ─── لوحة الوكيل ─── -->
+    <aside id="ai-panel" class="ai-panel hidden">
+      <div class="agent-h">Cortex Agent<small data-i18n="agent_sub">اكتب هدفك — يعمل من جملتك</small>
+        <span id="agent-session" class="chip hidden mono"></span>
+        <button id="contract-btn" class="icon-btn" data-i18n-title="contract_title">⚖</button>
+        <button id="ai-close-btn" class="icon-btn" aria-label="إغلاق" data-i18n-aria="b_close">✕</button>
+      </div>
+      <div class="ctxline mono" id="ai-context-line">—</div>
+      <!-- W3: الحالة الحيّة — ماذا يعمل الآن / ماذا ينتظرك / آخر نبضة (دائماً بلا نقر) -->
+      <div id="agent-live" class="agent-live hidden"></div>
+      <!-- الرسائل تأخذ المساحة، وما تحتها يبقى ثابتاً في الأسفل دائماً -->
+      <div id="chat-messages" class="trace" role="log" aria-live="polite" aria-relevant="additions" aria-label="سجل الوكيل" data-i18n-aria="aria_agent_log"></div>
+      <div id="agent-panes" class="agent-panes">
+        <ol id="agent-steps" class="steps pane-a"></ol>
+        <div id="agent-sources" class="stack pane-a"></div>
+        <div id="ai-pending-area" class="findings pane-a"></div>
+        <!-- المستجدات نُقلت خارج الشات (2026-10-30): لوحة مستقلة تُفتح من الشريحة في الشريط السفلي -->
+        <!-- بث الفريق المتوازي يعرض داخل سطح الوكيل الواحد (قرار التوحيد 2026-10-27) -->
+        <div id="team-live" class="team-live"></div>
+      </div>
+      <div id="team-summary" class="banner hidden"></div>
+      <!-- الخطوة التالية المقترحة — حدث من الوكيل يظهر عند اقتراحه لا زرّ نظام دائم -->
+      <div id="next-action-bar" class="next-action hidden">
+        <button id="next-action-btn" class="next-btn">
+          <span class="na-label" data-i18n="next_action_word">الخطوة التالية المقترحة</span>
+          <span id="next-action-text" class="na-text"></span>
+        </button>
+      </div>
+      <!-- أزرار الأوامر الجاهزة أُزيلت (2026-10-30، قرار المستخدم): «وكيل حقيقي = أكتب جملتي»
+           — لا أوامر مفروضة تحتل سطح المحادثة. الهدف يُكتب في الحقل مباشرة.
+           2026-10-30 (شاشة AGENT): أُزيل منتقي الوضع — الوكيل يقرر من الجملة (وذكر «فريق» يستدعي الفريق). -->
+      <div class="compose">
+        <button id="team-stop" class="minibtn hidden" type="button" data-i18n="b_team_stop">إيقاف</button>
+        <textarea id="chat-input" aria-label="هدف الوكيل" rows="2" dir="auto" data-i18n-ph="ph_goal" placeholder="اكتب للوكيل ما تريده… مثال: راجع هذا المستند وسجّل النواقص كمهام" data-i18n-aria="aria_goal"></textarea>
+        <button id="send-chat-btn" class="send" data-i18n="b_send">أرسل</button>
+      </div>
+    </aside>
+
+    <!-- W5: عقد الصلاحيات والأدوار — لوحة واحدة فوق نفس السطح (تأكيد صريح + تدقيق) -->
+    <aside id="contract-drawer" class="drawer hidden">
+      <div class="drawer-h"><span data-i18n="contract_title">الصلاحيات والأدوار</span><button id="contract-close-btn" class="icon-btn" aria-label="إغلاق" data-i18n-aria="b_close">✕</button></div>
+      <div id="contract-body" class="drawer-b"></div>
+    </aside>
+
+    <!-- عارض الملفات (قراءة فقط، 2026-10-29): يُفتح من «المصادر» أو نقاط الدخول في المستودعات -->
+    <aside id="file-drawer" class="drawer hidden">
+      <div class="drawer-h"><span id="file-path" class="mono tv-file-path" dir="ltr"></span><button id="file-close-btn" class="icon-btn" aria-label="إغلاق" data-i18n-aria="b_close">✕</button></div>
+      <div class="drawer-b"><pre id="file-body" class="file-view mono" dir="ltr"></pre></div>
+    </aside>
+
+    <footer class="statusbar">
+      <span id="status-badge" class="mono">…</span>
+      <span class="ok mono" id="status-db">SQLite ✓</span>
+      <span class="mono" id="status-health" role="status" aria-live="polite"></span>
+      <span class="mono dim" id="status-daemon" role="status" aria-live="polite"></span>
+      <!-- مستجدات الذاكرة (2026-10-30): كانت تغرق شات الوكيل — الآن شريحة هادئة تُفتح منها لوحة -->
+      <button id="findings-chip" class="chip hidden" type="button" data-i18n-title="findings_title">⚡ 0</button>
+      <span class="mono" id="sb-notes" style="margin-inline-start:auto">0 <span data-i18n="st_items">عنصر</span></span>
+    </footer>
+  </div>
+
+    <!-- لوحة المستجدات: حوصلة الفحوص الدورية (فجوات/تعارضات/تقادم) بلا احتلال سطح المحادثة -->
+    <aside id="findings-drawer" class="drawer hidden">
+      <div class="drawer-h"><span data-i18n="findings_title">⚡ مستجدات الذاكرة</span><button id="findings-close-btn" class="icon-btn" aria-label="إغلاق" data-i18n-aria="b_close">✕</button></div>
+      <div id="findings-body" class="drawer-b"></div>
+    </aside>
+
+<script src="/filemap.js?v=2"></script>
+<script src="/app.js?v=67" defer></script>
+  <div id="a11y-live" class="sr-only" role="status" aria-live="polite"></div>
+</body>
+</html>
