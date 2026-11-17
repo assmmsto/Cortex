@@ -1,0 +1,834 @@
+<!doctype html>
+<html lang="ar" dir="rtl" data-lang="ar">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>كورتكس — ذاكرة حيّة لمشاريعك</title>
+<meta name="description" content="كورتكس نظام تشغيل معرفة محلي: خزنة Markdown، ذاكرة مشاريع منظّمة في SQLite، استرجاع هجين، و28 أداة MCP تربط وكيلك بذاكرة مشاريعك — على جهازك." />
+<meta name="theme-color" content="#0b0e12" />
+<meta name="color-scheme" content="dark" />
+<meta property="og:type" content="website" />
+<meta property="og:site_name" content="Cortex" />
+<meta property="og:title" content="Cortex — A living memory for your projects" />
+<meta property="og:description" content="A local-first knowledge OS: Markdown vault, structured project memory, hybrid retrieval, and 28 MCP tools for your agent." />
+<meta property="og:image" content="assets/og.png" />
+<meta property="og:locale" content="ar_AR" />
+<meta property="og:locale:alternate" content="en_US" />
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:title" content="Cortex — A living memory for your projects" />
+<meta name="twitter:description" content="Local-first knowledge OS with 28 MCP tools and project memory for agents." />
+<meta name="twitter:image" content="assets/og.png" />
+<link rel="icon" href="assets/favicon.svg" type="image/svg+xml" />
+<link rel="preload" href="assets/fonts/alexandria-arabic.woff2" as="font" type="font/woff2" crossorigin />
+<link rel="preload" href="assets/fonts/plex-400.woff2" as="font" type="font/woff2" crossorigin />
+<link rel="stylesheet" href="styles.css" />
+<script>
+(function () {
+  try {
+    var l = localStorage.getItem('cortex-lang');
+    if (l !== 'en') l = 'ar';
+    var h = document.documentElement;
+    h.setAttribute('data-lang', l);
+    h.lang = l;
+    h.dir = l === 'ar' ? 'rtl' : 'ltr';
+  } catch (e) {}
+})();
+</script>
+</head>
+<body>
+<a class="skip-link" href="#main"><span class="t-ar">تجاوز إلى المحتوى</span><span class="t-en">Skip to content</span></a>
+
+<svg xmlns="http://www.w3.org/2000/svg" style="display:none" aria-hidden="true">
+  <symbol id="i-layers" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="m12 3 9 5-9 5-9-5 9-5Z"/><path d="m3 13 9 5 9-5"/><path d="m3 17 9 5 9-5"/></symbol>
+  <symbol id="i-brain" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><circle cx="5" cy="6" r="2"/><circle cx="19" cy="6" r="2"/><circle cx="5" cy="18" r="2"/><circle cx="19" cy="18" r="2"/><path d="m7 7 3 3M17 7l-3 3M7 17l3-3M17 17l-3-3"/></symbol>
+  <symbol id="i-bolt" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2 4 14h7l-1 8 9-12h-7l1-8Z"/></symbol>
+  <symbol id="i-infinity" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 12c-2-2.67-4-4-6-4a4 4 0 1 0 0 8c2 0 4-1.33 6-4Zm0 0c2 2.67 4 4 6 4a4 4 0 0 0 0-8c-2 0-4 1.33-6 4Z"/></symbol>
+  <symbol id="i-db" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="12" cy="6" rx="8" ry="3"/><path d="M4 6v6c0 1.7 3.6 3 8 3s8-1.3 8-3V6"/><path d="M4 12v6c0 1.7 3.6 3 8 3s8-1.3 8-3v-6"/></symbol>
+  <symbol id="i-graph" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="6" cy="6" r="2.2"/><circle cx="18" cy="7" r="2.2"/><circle cx="12" cy="18" r="2.2"/><path d="m8 7 3.2 8.8M16.2 8.4 13.6 16M8.2 6.4 15.7 6.9"/></symbol>
+  <symbol id="i-shield" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3 4.5 6v6c0 4.4 3.2 7.6 7.5 9 4.3-1.4 7.5-4.6 7.5-9V6L12 3Z"/><path d="m9 12 2 2 4-4"/></symbol>
+  <symbol id="i-terminal" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="m7 9 3 3-3 3M13 15h4"/></symbol>
+  <symbol id="i-search" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></symbol>
+  <symbol id="i-copy" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></symbol>
+  <symbol id="i-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></symbol>
+  <symbol id="i-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5"/><path d="m12 5-7 7 7 7"/></symbol>
+  <symbol id="i-globe" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M3 12h18"/><path d="M12 3c2.5 2.5 3.8 5.6 3.8 9S14.5 18.5 12 21c-2.5-2.5-3.8-5.6-3.8-9S9.5 5.5 12 3Z"/></symbol>
+  <symbol id="i-desktop" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="13" rx="2"/><path d="M8 21h8M12 17v4"/></symbol>
+  <symbol id="i-key" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="15" r="4"/><path d="m11 12 8-8m-3 0h3v3"/></symbol>
+  <symbol id="i-lock" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="10" width="16" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/><path d="M12 15v2"/></symbol>
+  <symbol id="i-plus" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></symbol>
+  <symbol id="i-menu" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"><path d="M3 6h18M3 12h18M3 18h18"/></symbol>
+  <symbol id="i-close" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></symbol>
+  <symbol id="i-history" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 3-6.7"/><path d="M3 3v6h6"/><path d="M12 8v5l3 2"/></symbol>
+  <symbol id="i-spark" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="m12 3 1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8L12 3Z"/><path d="m19 16 .9 2.1L22 19l-2.1.9L19 22l-.9-2.1L16 19l2.1-.9L19 16Z"/></symbol>
+  <symbol id="i-link" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.5.5l2-2a5 5 0 0 0-7-7l-1.2 1.2"/><path d="M14 11a5 5 0 0 0-7.5-.5l-2 2a5 5 0 0 0 7 7l1.2-1.2"/></symbol>
+</svg>
+
+<header class="site-header" id="header">
+  <div class="wrap header-inner">
+    <a class="brand" href="#top" aria-label="Cortex">
+      <span class="brand-mark"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-layers"/></svg></span>
+      <span>
+        <span class="brand-name">Cortex</span>
+        <span class="brand-tag t-ar">الذاكرة الحيّة</span>
+        <span class="brand-tag t-en">The living memory</span>
+      </span>
+    </a>
+    <nav class="nav" aria-label="Navigation">
+      <a href="#features"><span class="t-ar">المزايا</span><span class="t-en">Features</span></a>
+      <a href="#editor"><span class="t-ar">المحرّر</span><span class="t-en">Editor</span></a>
+      <a href="#mcp">MCP</a>
+      <a href="#security"><span class="t-ar">الأمان</span><span class="t-en">Security</span></a>
+      <a href="#faq"><span class="t-ar">الأسئلة</span><span class="t-en">FAQ</span></a>
+    </nav>
+    <div class="header-actions">
+      <div class="lang-switch" role="group" aria-label="Language / اللغة">
+        <button type="button" data-set-lang="ar" aria-pressed="true">AR</button>
+        <button type="button" data-set-lang="en" aria-pressed="false">EN</button>
+      </div>
+      <a class="btn btn-primary" href="#quickstart"><span class="t-ar">شغّله الآن</span><span class="t-en">Run it</span></a>
+      <button class="menu-btn" id="menuBtn" type="button" aria-expanded="false" aria-controls="mobileNav" aria-label="Menu">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-menu"/></svg>
+      </button>
+    </div>
+  </div>
+  <div class="progress" id="progress" aria-hidden="true"></div>
+</header>
+
+<div class="mobile-nav" id="mobileNav">
+  <a href="#features"><span class="t-ar">المزايا</span><span class="t-en">Features</span><span aria-hidden="true">←</span></a>
+  <a href="#editor"><span class="t-ar">المحرّر</span><span class="t-en">Editor</span><span aria-hidden="true">←</span></a>
+  <a href="#mcp">MCP<span aria-hidden="true">←</span></a>
+  <a href="#security"><span class="t-ar">الأمان</span><span class="t-en">Security</span><span aria-hidden="true">←</span></a>
+  <a href="#quickstart"><span class="t-ar">التشغيل</span><span class="t-en">Run</span><span aria-hidden="true">←</span></a>
+  <a href="#faq"><span class="t-ar">الأسئلة</span><span class="t-en">FAQ</span><span aria-hidden="true">←</span></a>
+  <a class="btn btn-primary" href="#quickstart"><span class="t-ar">شغّله الآن</span><span class="t-en">Run it now</span></a>
+</div>
+
+<main id="main">
+  <span id="top"></span>
+
+  <!-- ============ HERO ============ -->
+  <section class="hero">
+    <div class="wrap">
+      <div class="hero-grid">
+        <div class="hero-copy">
+          <div class="hero-badge">
+            <span class="tag">v5.0.0</span>
+            <span class="sep"></span>
+            <span class="t-ar">محلي أولاً · MIT</span>
+            <span class="t-en">LOCAL-FIRST · MIT</span>
+          </div>
+          <h1>
+            <span class="line t-ar">ذاكرة حيّة</span><span class="line t-en">A living memory</span>
+            <span class="line gold-text t-ar">لمشاريعك.</span><span class="line gold-text t-en">for your projects.</span>
+          </h1>
+          <p class="hero-lead">
+            <span class="t-ar">كورتكس يحوّل ملاحظاتك وقراراتك ومهامك إلى ذاكرة منظّمة محلية. يقرأها وكيلك، يستشهد بمصادرها، ويعمل عليها — <b>بإذنك</b>.</span>
+            <span class="t-en">Cortex turns your notes, decisions, and tasks into a structured local memory. Your agent reads it, cites its sources, and acts on it — <b>with your permission</b>.</span>
+          </p>
+          <div class="hero-cta">
+            <a class="btn btn-primary" href="#quickstart">
+              <span class="t-ar">شغّله محلياً</span><span class="t-en">Run it locally</span>
+              <svg class="arrow" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-arrow"/></svg>
+            </a>
+            <a class="btn btn-ghost" href="#editor">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-layers"/></svg>
+              <span class="t-ar">استكشف الواجهة</span><span class="t-en">See the interface</span>
+            </a>
+          </div>
+          <div class="hero-meta">
+            <span><svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-check"/></svg>Node ≥ 22.5</span>
+            <span><svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-check"/></svg><span class="t-ar">بلا تبعيات تشغيل</span><span class="t-en">0 runtime dependencies</span></span>
+            <span><svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-check"/></svg><span class="t-ar">127.0.0.1 افتراضياً</span><span class="t-en">127.0.0.1 by default</span></span>
+          </div>
+        </div>
+
+        <div class="hero-visual">
+          <div class="frame">
+            <div class="frame-bar">
+              <span class="dots" aria-hidden="true"><i></i><i></i><i></i></span>
+              <span class="frame-url">127.0.0.1:3737</span>
+              <span class="frame-live">LOCAL</span>
+            </div>
+            <img class="shot" src="assets/shots/agent-ar.png" width="1440" height="900" alt="Cortex agent interface — Arabic" loading="eager" />
+          </div>
+          <div class="float-card float-1">
+            <span class="ic"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-layers"/></svg></span>
+            <span><b>28</b><small class="t-ar">أداة MCP</small><small class="t-en">MCP tools</small></span>
+          </div>
+          <div class="float-card float-2">
+            <span class="ic"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-check"/></svg></span>
+            <span><b>479</b><small class="t-ar">اختباراً ناجحاً</small><small class="t-en">tests passing</small></span>
+          </div>
+          <div class="float-card float-3">
+            <span class="ic"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-globe"/></svg></span>
+            <span><b>AR / EN</b><small class="t-ar">واجهة كاملة</small><small class="t-en">Full interface</small></span>
+          </div>
+          <p class="hero-note">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-check"/></svg>
+            <span class="t-ar">الواجهة العربية — بيانات Atlas التجريبية.</span>
+            <span class="t-en">The Arabic interface — fictional Atlas data.</span>
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="trust">
+    <div class="wrap trust-inner">
+      <span class="trust-label t-ar">يعمل مع أدواتك</span>
+      <span class="trust-label t-en">Works with your stack</span>
+      <div class="trust-list">
+        <span class="trust-chip">Claude Code</span>
+        <span class="trust-chip">OpenCode</span>
+        <span class="trust-chip">DeepSeek Harness</span>
+        <span class="trust-chip">MCP</span>
+        <span class="trust-chip">Ollama</span>
+        <span class="trust-chip">OpenAI-compatible</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="stats-band">
+    <div class="wrap">
+      <div class="stats">
+        <div class="stat"><div class="stat-num"><span data-count="28">28</span></div><div class="stat-lbl"><span class="t-ar">أداة MCP جاهزة</span><span class="t-en">MCP tools</span></div></div>
+        <div class="stat"><div class="stat-num"><span data-count="479">479</span></div><div class="stat-lbl"><span class="t-ar">اختباراً في آخر تشغيل</span><span class="t-en">tests in the last run</span></div></div>
+        <div class="stat"><div class="stat-num"><span data-count="2">2</span></div><div class="stat-lbl"><span class="t-ar">لغتان بواجهة كاملة</span><span class="t-en">full languages</span></div></div>
+        <div class="stat"><div class="stat-num"><span data-count="0">0</span></div><div class="stat-lbl"><span class="t-ar">تبعيات تشغيل</span><span class="t-en">runtime dependencies</span></div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ PROBLEM ============ -->
+  <section class="section" id="problem">
+    <div class="wrap">
+      <div class="section-head" data-reveal>
+        <p class="eyebrow"><span class="idx">01</span><span class="bar"></span><span class="t-ar">المشكلة</span><span class="t-en">The problem</span></p>
+        <h2 class="h2">
+          <span class="t-ar">ملاحظاتك تعرف أكثر<br>مما تستطيع أدواتك استخدامه.</span>
+          <span class="t-en">Your notes know more<br>than your tools can use.</span>
+        </h2>
+        <p class="lead">
+          <span class="t-ar">الملاحظات نصّ. والقرارات سياق. والوكيل يبدأ كل جلسة من الصفر — لأن الذاكرة ليست في مكان يفهمه.</span>
+          <span class="t-en">Notes are text. Decisions are context. And every agent session starts from zero — because the memory isn't somewhere it can read.</span>
+        </p>
+      </div>
+      <div class="pain-grid">
+        <article class="pain" data-reveal>
+          <span class="num">01</span>
+          <h3><span class="t-ar">معرفة موزّعة</span><span class="t-en">Knowledge, scattered</span></h3>
+          <p><span class="t-ar">PRD في مستند، قرار في محادثة، مهمة في تذكرة. لا شيء يربطها.</span><span class="t-en">The PRD in a doc, the decision in a chat, the task in a ticket. Nothing links them.</span></p>
+        </article>
+        <article class="pain" data-reveal style="--d:80ms">
+          <span class="num">02</span>
+          <h3><span class="t-ar">نص بلا حالة</span><span class="t-en">Text without state</span></h3>
+          <p><span class="t-ar">الملاحظة لا تعرف نوعها ولا مشروعها ولا علاقاتها، فلا يمكن الاستعلام عنها.</span><span class="t-en">A note doesn't know its type, project, or relations — so it can't be queried.</span></p>
+        </article>
+        <article class="pain" data-reveal style="--d:160ms">
+          <span class="num">03</span>
+          <h3><span class="t-ar">وكيل بلا ذاكرة</span><span class="t-en">Agents without memory</span></h3>
+          <p><span class="t-ar">كل جلسة تعيد قراءة المشروع كله، أو تخمّن. لا مصادر، ولا مسار عمل.</span><span class="t-en">Every session re-reads the whole project, or guesses. No sources, no trail.</span></p>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ PILLARS ============ -->
+  <section class="section section--soft" id="features">
+    <div class="wrap">
+      <div class="section-head" data-reveal>
+        <p class="eyebrow"><span class="idx">02</span><span class="bar"></span><span class="t-ar">أربع طبقات</span><span class="t-en">Four layers</span></p>
+        <h2 class="h2">
+          <span class="t-ar">من الملاحظة إلى الفعل،<br>في نظام واحد.</span>
+          <span class="t-en">From note to action,<br>in one system.</span>
+        </h2>
+        <p class="lead">
+          <span class="t-ar">كل طبقة تعمل وحدها، وتُغني التي بعدها. لا قفل على صيغة، ولا سحابة في المنتصف.</span>
+          <span class="t-en">Each layer works on its own — and makes the next one better. No format lock-in, no cloud in the middle.</span>
+        </p>
+      </div>
+      <div class="pillars">
+        <article class="pillar" data-reveal>
+          <span class="pnum">01</span>
+          <span class="pic"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-db"/></svg></span>
+          <h3><span class="t-ar">الذاكرة</span><span class="t-en">Memory</span></h3>
+          <p><span class="t-ar">خزنة Markdown محلية، ومرآة SQLite منظّمة، وسياق مرتبط لكل مستند.</span><span class="t-en">A local Markdown vault, a structured SQLite mirror, and linked context for every document.</span></p>
+        </article>
+        <article class="pillar" data-reveal style="--d:70ms">
+          <span class="pnum">02</span>
+          <span class="pic"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-brain"/></svg></span>
+          <h3><span class="t-ar">الاستدلال</span><span class="t-en">Reasoning</span></h3>
+          <p><span class="t-ar">استرجاع هجين، كشف تناقضات وفجوات، ودرجة صحة لكل مشروع.</span><span class="t-en">Hybrid retrieval, contradiction and gap detection, and a health score per project.</span></p>
+        </article>
+        <article class="pillar" data-reveal style="--d:140ms">
+          <span class="pnum">03</span>
+          <span class="pic"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-bolt"/></svg></span>
+          <h3><span class="t-ar">الفعل</span><span class="t-en">Action</span></h3>
+          <p><span class="t-ar">الوكيل الداخلي يملك <strong>48 أداة</strong> (معرفة، ملفات، مستودع، git، تنفيذ، استيراد)، و<strong>28 أداة MCP</strong> تعرّض الذاكرة للوكلاء الخارجيين — احتضان المشروع، قاطع السياق، ومسار وكيل دائم.</span><span class="t-en">The built-in agent has <strong>48 tools</strong> (knowledge, files, repo, git, execution, import), and <strong>28 MCP tools</strong> expose the memory to external agents — project absorption, context slicing, and a durable agent trail.</span></p>
+        </article>
+        <article class="pillar" data-reveal style="--d:210ms">
+          <span class="pnum">04</span>
+          <span class="pic"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-infinity"/></svg></span>
+          <h3><span class="t-ar">الاستمرارية</span><span class="t-en">Continuity</span></h3>
+          <p><span class="t-ar">لقطات تاريخ، نسخ ZIP، ملاحظات حيّة، وجلسات تنجو من إعادة السياق.</span><span class="t-en">History snapshots, ZIP backups, living notes, and sessions that survive context resets.</span></p>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ EDITOR ============ -->
+  <section class="section" id="editor">
+    <div class="wrap">
+      <div class="feature">
+        <div class="feature-text" data-reveal>
+          <p class="eyebrow"><span class="idx">03</span><span class="bar"></span><span class="t-ar">المحرّر</span><span class="t-en">The editor</span></p>
+          <h2 class="h2">
+            <span class="t-ar">محرّر معرفة،<br>لا مجرد محرّر نصوص.</span>
+            <span class="t-en">A knowledge editor,<br>not just a text editor.</span>
+          </h2>
+          <p class="lead">
+            <span class="t-ar">كل مستند يعرف نوعه ومشروعه وعلاقاته. حرّر، عاين، تنقّل، وارجع لأي لقطة.</span>
+            <span class="t-en">Every document knows its type, project, and relations. Edit, preview, navigate, and restore any snapshot.</span>
+          </p>
+          <ul class="bullets">
+            <li><svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-check"/></svg><span><span class="t-ar"><b>خزنة Markdown + frontmatter:</b> PRD، Spec، ADR، Meeting، Decision، Procedure، Living Note.</span><span class="t-en"><b>Markdown vault + frontmatter:</b> PRD, Spec, ADR, Meeting, Decision, Procedure, Living Note.</span></span></li>
+            <li><svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-check"/></svg><span><span class="t-ar"><b>شجرة مشاريع:</b> مستندات، قرارات، مهام، اجتماعات، ملاحظات.</span><span class="t-en"><b>Project tree:</b> docs, decisions, tasks, meetings, notes.</span></span></li>
+            <li><svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-check"/></svg><span><span class="t-ar"><b>تحرير / مزدوج / قراءة</b> — مع جداول وقوائم مهام حقيقية.</span><span class="t-en"><b>Edit / split / read</b> — with real tables and task checkboxes.</span></span></li>
+            <li><svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-check"/></svg><span><span class="t-ar"><b>⌘K للتنقّل</b> بين الملاحظات والأوامر ونتائج البحث.</span><span class="t-en"><b>⌘K switcher</b> for notes, commands, and search results.</span></span></li>
+            <li><svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-check"/></svg><span><span class="t-ar"><b>سياق مرتبط:</b> مهام، مرتبطات، روابط خلفية، وسجل لقطات.</span><span class="t-en"><b>Linked context:</b> tasks, related notes, backlinks, and snapshot history.</span></span></li>
+          </ul>
+        </div>
+        <div class="feature-visual" data-reveal style="--d:80ms">
+          <div class="frame">
+            <div class="frame-bar">
+              <span class="dots" aria-hidden="true"><i></i><i></i><i></i></span>
+              <span class="frame-url">127.0.0.1:3737</span>
+              <span class="frame-live">EDIT</span>
+            </div>
+            <img class="shot" src="assets/shots/editor-ar.png" width="1440" height="1000" alt="Cortex knowledge editor — Arabic" loading="lazy" />
+          </div>
+          <p class="frame-cap">
+            <span class="t-ar">لقطة من واجهة كورتكس — مشروع Atlas التجريبي.</span>
+            <span class="t-en">A capture of the Cortex interface — the fictional Atlas project.</span>
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ PROJECT MEMORY ============ -->
+  <section class="section section--soft" id="memory">
+    <div class="wrap">
+      <div class="feature reverse">
+        <div class="feature-text" data-reveal>
+          <p class="eyebrow"><span class="idx">04</span><span class="bar"></span><span class="t-ar">ذاكرة المشروع</span><span class="t-en">Project memory</span></p>
+          <h2 class="h2">
+            <span class="t-ar">ذاكرة مشروع<br>يقرأها الوكيل قبل أن يكتب.</span>
+            <span class="t-en">Project memory<br>your agent reads first.</span>
+          </h2>
+          <p class="lead">
+            <span class="t-ar">أربع أدوات تجعل وكيل البناء يعمل من خريطة المشروع، لا من قراءة كل ملف في كل مرة. خرائط لا نسخ — ومسار لا يضيع مع السياق.</span>
+            <span class="t-en">Four tools let a coding agent work from the project map, not from re-reading every file. Maps, not copies — and a trail that survives context resets.</span>
+          </p>
+          <div class="tools-grid">
+            <div class="tool-card"><div class="tn">project_absorb</div><p><span class="t-ar">يمسح المصدر مرة واحدة: أهم الملفات بدرجة الاعتماد، نقاط الدخول، وحواف الاستيراد الفعلية.</span><span class="t-en">Scans the source once: key files by dependency degree, entry points, and real import edges.</span></p></div>
+            <div class="tool-card"><div class="tn">memory_slice</div><p><span class="t-ar">قبل أي تعديل: الملف الهدف، ما يعتمد عليه، ما يعتمد عليه، والملفات المتأثرة — مسارات وتلخيص، لا محتوى كامل.</span><span class="t-en">Before any edit: the target file, its dependencies, dependents, and affected files — paths and a summary, not full contents.</span></p></div>
+            <div class="tool-card"><div class="tn">memory_record</div><p><span class="t-ar">بعد كل خطوة: سجل دائم لما جرى، مع الملفات التي مُسّت.</span><span class="t-en">After every step: a durable record of what happened, with the files touched.</span></p></div>
+            <div class="tool-card"><div class="tn">project_trail</div><p><span class="t-ar">عند الاستئناف: أين توقّف العمل، منك ومن الوكلاء الآخرين، الأحدث أولاً.</span><span class="t-en">On resume: where work stopped — yours and other agents' — newest first.</span></p></div>
+          </div>
+        </div>
+        <div class="feature-visual" data-reveal style="--d:80ms">
+          <div class="code-card" style="margin-top:0">
+            <div class="code-head">
+              <div class="tabs"><span class="tab" aria-selected="true" style="cursor:default">memory_slice</span></div>
+              <span class="file">mcp / tool call</span>
+            </div>
+            <div class="code-panel is-active" style="display:block">
+<pre><code><span class="tok-f">memory_slice</span> {
+  <span class="tok-k">project</span>: <span class="tok-s">"rent-app"</span>,
+  <span class="tok-k">file</span>: <span class="tok-s">"src/billing.js"</span>,
+  <span class="tok-k">query</span>: <span class="tok-s">"add discount to invoice"</span>
+}
+
+<span class="tok-c">→ target: src/billing.js</span>
+  <span class="tok-k">depends on</span> (3): db.js, money.js, invoice.js
+  <span class="tok-k">depended on by</span> (5): routes/pay.js, routes/admin.js, test/billing.test.js
+  <span class="tok-n">warning</span>: editing touches 5 files</code></pre>
+            </div>
+            <div class="code-note">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-link"/></svg>
+              <span class="t-ar">الرد مسارات وتلخيص — لا ينسخ مشروعك.</span>
+              <span class="t-en">The reply is paths and a summary — it never copies your project.</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ AGENT ============ -->
+  <section class="section" id="agent">
+    <div class="wrap">
+      <div class="feature">
+        <div class="feature-text" data-reveal>
+          <p class="eyebrow"><span class="idx">05</span><span class="bar"></span><span class="t-ar">الوكيل</span><span class="t-en">The agent</span></p>
+          <h2 class="h2">
+            <span class="t-ar">إجابات من معرفتك.<br>بمصادر، لا بتخمين.</span>
+            <span class="t-en">Answers from memory.<br>Sources, not guesses.</span>
+          </h2>
+          <p class="lead">
+            <span class="t-ar">الوكيل يقرأ من الذاكرة، يذكر ما استند إليه، ويكشف ما يتعارض. وإن لم يجد، يقول ذلك.</span>
+            <span class="t-en">The agent reads from memory, cites what it used, and flags what conflicts. If it can't find it, it says so.</span>
+          </p>
+          <ul class="bullets">
+            <li><svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-check"/></svg><span><span class="t-ar"><b>تلخيص مع نقد للاكتمال</b> — لا ملخص بلا فجوات معلنة.</span><span class="t-en"><b>Summaries with a completeness critique</b> — no summary without declared gaps.</span></span></li>
+            <li><svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-check"/></svg><span><span class="t-ar"><b>اجتماع → مهام</b> بأصحاب ومواعيد، وتطبيق بموافقتك.</span><span class="t-en"><b>Meeting notes → action items</b> with owners and dates, applied with your approval.</span></span></li>
+            <li><svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-check"/></svg><span><span class="t-ar"><b>كشف تناقضات</b> بين المستندات مع المصادر.</span><span class="t-en"><b>Cross-document contradictions</b>, with sources.</span></span></li>
+            <li><svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-check"/></svg><span><span class="t-ar"><b>إجابات بشرائح مصادر</b> — لا معرفة عامة.</span><span class="t-en"><b>Answers with source chips</b> — never general knowledge.</span></span></li>
+            <li><svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-check"/></svg><span><span class="t-ar"><b>وضع mock حتمي</b> عند غياب المزوّد.</span><span class="t-en"><b>A deterministic mock fallback</b> when no provider is configured.</span></span></li>
+          </ul>
+        </div>
+        <div class="feature-visual" data-reveal style="--d:80ms">
+          <div class="chat-demo">
+            <div class="chat-bar">
+              <span class="dots" aria-hidden="true"><i></i><i></i><i></i></span>
+              <span class="mono">cortex · grounded answer</span>
+              <span class="chat-live"><span class="t-ar">موثّق</span><span class="t-en">GROUNDED</span></span>
+            </div>
+            <div class="chat-body">
+              <div class="chat-q">
+                <span class="t-ar">ما القرار المتخذ عن التخزين؟</span>
+                <span class="t-en">What was decided about storage?</span>
+              </div>
+              <div class="chat-tool">
+                <span class="ti" aria-hidden="true">↳</span>
+                <span class="mono">memory_search</span>
+                <span class="t-ar">«SQLite IndexedDB» · 3 نتائج</span>
+                <span class="t-en">"SQLite IndexedDB" · 3 results</span>
+              </div>
+              <div class="chat-a">
+                <p>
+                  <span class="t-ar">اخترنا SQLite + WAL مع Parquet للأرشيف البارد. القرار موثّق في <span class="cite">ADR-014</span> واعتُمد في <span class="cite">Sprint 12</span> بعد قياس p95 على 5 ملايين حدث.</span>
+                  <span class="t-en">We chose SQLite + WAL with Parquet for the cold archive. It is documented in <span class="cite">ADR-014</span> and approved in <span class="cite">Sprint 12</span> after measuring p95 on 5M events.</span>
+                </p>
+                <div class="chat-src">
+                  <span class="lbl t-ar">المصادر</span><span class="lbl t-en">Sources</span>
+                  <span class="chip">ADR-014</span>
+                  <span class="chip">Sprint 12</span>
+                </div>
+              </div>
+            </div>
+          </div>
+          <p class="frame-cap">
+            <span class="t-ar">شكل الإجابة: نصّ + مصادر قابلة للتتبّع.</span>
+            <span class="t-en">The answer shape: prose + traceable sources.</span>
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ MCP ============ -->
+  <section class="section section--soft" id="mcp">
+    <div class="wrap">
+      <div class="section-head" data-reveal>
+        <p class="eyebrow"><span class="idx">06</span><span class="bar"></span><span class="t-ar">بروتوكول MCP</span><span class="t-en">MCP</span></p>
+        <h2 class="h2">
+          <span class="t-ar">28 أداة. بروتوكول واحد.<br>أي وكيل.</span>
+          <span class="t-en">28 tools. One protocol.<br>Any agent.</span>
+        </h2>
+        <p class="lead">
+          <span class="t-ar">كورتكس يقدّم ذاكرته كخادم MCP عبر stdio أو HTTP. عرّفه مرة، وكل وكيل يقرأ ويكتب في نفس الذاكرة. أما وكيل كورتكس الداخلي فيعمل بـ48 أداة (ملفات، مستودع، git، تنفيذ، استيراد) تحت جدول صلاحيات حتمي.</span>
+          <span class="t-en">Cortex exposes its memory as an MCP server over stdio or HTTP. Define it once, and every agent reads and writes the same memory. Its own agent works with 48 tools (files, repo, git, execution, import) behind a deterministic permission table.</span>
+        </p>
+      </div>
+
+      <div class="code-card" data-reveal>
+        <div class="code-head">
+          <div class="tabs" role="tablist" aria-label="MCP configuration">
+            <button class="tab" role="tab" id="tab-claude" aria-controls="panel-claude" aria-selected="true" type="button">Claude Code</button>
+            <button class="tab" role="tab" id="tab-json" aria-controls="panel-json" aria-selected="false" type="button">JSON</button>
+            <button class="tab" role="tab" id="tab-http" aria-controls="panel-http" aria-selected="false" type="button">HTTP</button>
+          </div>
+          <span class="file" id="mcpFile">shell</span>
+          <button class="copy" type="button" data-copy="panel-claude" id="copyMcp">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-copy"/></svg>
+            <span class="t-ar">نسخ</span><span class="t-en">Copy</span>
+          </button>
+        </div>
+        <div class="code-body">
+          <div class="code-panel is-active" id="panel-claude" role="tabpanel" aria-labelledby="tab-claude">
+<pre><code><span class="tok-f">claude</span> mcp add cortex -- node <span class="tok-s">"C:\path\to\cortex\mcp-memory-server.js"</span> \
+  --root <span class="tok-s">"C:\path\to\cortex"</span></code></pre>
+          </div>
+          <div class="code-panel" id="panel-json" role="tabpanel" aria-labelledby="tab-json">
+<pre><code>{
+  <span class="tok-k">"mcpServers"</span>: {
+    <span class="tok-k">"cortex"</span>: {
+      <span class="tok-k">"command"</span>: <span class="tok-s">"node"</span>,
+      <span class="tok-k">"args"</span>: [
+        <span class="tok-s">"C:\\path\\to\\cortex\\mcp-memory-server.js"</span>,
+        <span class="tok-s">"--root"</span>, <span class="tok-s">"C:\\path\\to\\cortex"</span>
+      ],
+      <span class="tok-k">"env"</span>: { <span class="tok-k">"CORTEX_ALLOWED_ROOTS"</span>: <span class="tok-s">"E:\\projects"</span> }
+    }
+  }
+}</code></pre>
+          </div>
+          <div class="code-panel" id="panel-http" role="tabpanel" aria-labelledby="tab-http">
+<pre><code><span class="tok-c"># Remote MCP — any runtime that speaks MCP over HTTP</span>
+<span class="tok-f">http</span>://127.0.0.1:3737/mcp</code></pre>
+          </div>
+        </div>
+        <div class="code-note">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-link"/></svg>
+          <span class="t-ar">المساران يعملان معاً: stdio للوكلاء المحليين، وHTTP لأي runtime يدعم MCP عن بُعد.</span>
+          <span class="t-en">Both work: stdio for local agents, HTTP for any runtime that supports remote MCP.</span>
+        </div>
+      </div>
+
+      <div class="mcp-cats">
+        <div class="mcp-cat" data-reveal>
+          <span class="n">19</span>
+          <h3><span class="t-ar">الذاكرة</span><span class="t-en">Memory</span></h3>
+          <p><span class="t-ar">بحث، قراءة، كتابة، إحصاءات، تصنيف، استخراج، تناقضات، فجوات، حالة مشروع.</span><span class="t-en">Search, read, write, stats, classify, extract, contradictions, gaps, project state.</span></p>
+          <code>memory_search</code>
+        </div>
+        <div class="mcp-cat" data-reveal style="--d:70ms">
+          <span class="n">05</span>
+          <h3><span class="t-ar">الوكيل</span><span class="t-en">Agent</span></h3>
+          <p><span class="t-ar">جلسة، رسالة، مراجعة سياق، أفضل إجراء تالٍ، ملاحظة حيّة.</span><span class="t-en">Session, message, context review, next best action, living note.</span></p>
+          <code>agent_start_session</code>
+        </div>
+        <div class="mcp-cat" data-reveal style="--d:140ms">
+          <span class="n">04</span>
+          <h3><span class="t-ar">ذاكرة المشروع</span><span class="t-en">Project memory</span></h3>
+          <p><span class="t-ar">احتضان، قاطع سياق، تسجيل، مسار.</span><span class="t-en">Absorb, slice, record, trail.</span></p>
+          <code>memory_slice</code>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ HOW ============ -->
+  <section class="section" id="how">
+    <div class="wrap">
+      <div class="section-head" data-reveal>
+        <p class="eyebrow"><span class="idx">07</span><span class="bar"></span><span class="t-ar">كيف يعمل</span><span class="t-en">How it works</span></p>
+        <h2 class="h2">
+          <span class="t-ar">أربع خطوات،<br>من الصفر إلى ذاكرة تعمل.</span>
+          <span class="t-en">Four steps,<br>from zero to a working memory.</span>
+        </h2>
+      </div>
+      <div class="steps">
+        <div class="step" data-reveal><span class="step-num">01</span><h3><span class="t-ar">شغّله</span><span class="t-en">Run it</span></h3><p><span class="t-ar"><code>npm start</code> — خادم محلي على 3737. بلا تثبيت تبعيات.</span><span class="t-en"><code>npm start</code> — a local server on 3737. No dependency install.</span></p><span class="step-foot">localhost:3737</span></div>
+        <div class="step" data-reveal style="--d:70ms"><span class="step-num">02</span><h3><span class="t-ar">أضف معرفتك</span><span class="t-en">Add your knowledge</span></h3><p><span class="t-ar">خزنة Markdown جديدة أو استيراد ملفاتك ومشاريعك.</span><span class="t-en">A new Markdown vault, or import your files and projects.</span></p><span class="step-foot">markdown + sqlite</span></div>
+        <div class="step" data-reveal style="--d:140ms"><span class="step-num">03</span><h3><span class="t-ar">صِل مزوّدك</span><span class="t-en">Connect a provider</span></h3><p><span class="t-ar">Ollama محلي أو أي واجهة OpenAI-compatible.</span><span class="t-en">Local Ollama or any OpenAI-compatible endpoint.</span></p><span class="step-foot">openai-compatible</span></div>
+        <div class="step" data-reveal style="--d:210ms"><span class="step-num">04</span><h3><span class="t-ar">صِل وكيلك</span><span class="t-en">Connect your agent</span></h3><p><span class="t-ar">MCP عبر stdio أو <code>127.0.0.1:3737/mcp</code>.</span><span class="t-en">MCP over stdio or <code>127.0.0.1:3737/mcp</code>.</span></p><span class="step-foot">stdio / http</span></div>
+      </div>
+
+      <div class="arch" data-reveal aria-label="Architecture">
+        <div class="arch-col">
+          <div class="arch-label"><i></i><span class="t-ar">معرفتك</span><span class="t-en">Your knowledge</span></div>
+          <span class="arch-chip">Markdown vault</span>
+          <span class="arch-chip">frontmatter</span>
+          <span class="arch-chip">history / backups</span>
+        </div>
+        <div class="arch-link" aria-hidden="true"><span class="line"></span><span>parse</span></div>
+        <div class="arch-core">
+          <div class="top"><span class="name">CORTEX</span><span class="pill">5.0</span></div>
+          <div class="mod"><span class="d"></span>Storage<span class="m">SQLite mirror</span></div>
+          <div class="mod"><span class="d"></span>Retrieval<span class="m">lexical + vector + MMR</span></div>
+          <div class="mod"><span class="d"></span>Reasoning<span class="m">gaps · contradictions</span></div>
+          <div class="mod"><span class="d"></span>Agent + MCP<span class="m">28 tools</span></div>
+          <div class="mod"><span class="d"></span>UI<span class="m">AR / EN</span></div>
+        </div>
+        <div class="arch-link" aria-hidden="true"><span class="line"></span><span>MCP</span></div>
+        <div class="arch-col">
+          <div class="arch-label"><i></i><span class="t-ar">وكلاؤك</span><span class="t-en">Your agents</span></div>
+          <span class="arch-chip">Claude Code</span>
+          <span class="arch-chip">OpenCode</span>
+          <span class="arch-chip">DeepSeek Harness</span>
+          <span class="arch-chip">any MCP runtime</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ BILINGUAL ============ -->
+  <section class="section section--soft" id="bilingual">
+    <div class="wrap">
+      <div class="section-head" data-reveal>
+        <p class="eyebrow"><span class="idx">08</span><span class="bar"></span><span class="t-ar">ثنائي اللغة</span><span class="t-en">Bilingual</span></p>
+        <h2 class="h2">
+          <span class="t-ar">عربي وإنجليزي.<br>بالكامل.</span>
+          <span class="t-en">Arabic and English.<br>Completely.</span>
+        </h2>
+        <p class="lead">
+          <span class="t-ar">الواجهة كلها تنقلب مع اللغة: الاتجاه، القاموس، والنصوص الديناميكية. حجم الخط S/M/L/XL ولون التمييز يُحفظان محلياً.</span>
+          <span class="t-en">The whole interface flips with the language: direction, dictionary, and dynamic strings. Font size S/M/L/XL and accent color are saved locally.</span>
+        </p>
+      </div>
+      <div class="bi-grid">
+        <div class="bi-card" data-reveal>
+          <div class="bi-toggle" aria-hidden="true"><span class="on">AR</span><span>EN</span></div>
+          <div class="bi-list">
+            <div class="bi-row"><span class="ar">المعرفة</span><span class="en">Knowledge</span></div>
+            <div class="bi-row"><span class="ar">الخارطة</span><span class="en">Map</span></div>
+            <div class="bi-row"><span class="ar">المراقبة</span><span class="en">Monitor</span></div>
+            <div class="bi-row"><span class="ar">المستودعات</span><span class="en">Repositories</span></div>
+            <div class="bi-row"><span class="ar">المزوّدون</span><span class="en">Providers</span></div>
+            <div class="bi-row"><span class="ar">الاستيراد</span><span class="en">Import</span></div>
+            <div class="bi-row"><span class="ar">الأدوات</span><span class="en">Tools</span></div>
+            <div class="bi-row"><span class="ar">الحوكمة</span><span class="en">Governance</span></div>
+          </div>
+          <p class="bi-note">
+            <span class="t-ar">اتجاه كامل + Placeholders + <code style="font-family:var(--mono);direction:ltr">dir=auto</code> للمحتوى.</span>
+            <span class="t-en">Full direction + placeholders + <code style="font-family:var(--mono)">dir=auto</code> for content.</span>
+          </p>
+        </div>
+        <div class="bi-card" data-reveal style="--d:80ms">
+          <h3><span class="t-ar">الاتجاه يتبع اللغة</span><span class="t-en">Direction follows the language</span></h3>
+          <p>
+            <span class="t-ar">واجهة إنجليزية بالكامل، والمحتوى العربي يبقى RTL داخل المحرّر بفضل <code>dir=auto</code>. لا نسخة ثانية من المنتج.</span>
+            <span class="t-en">A fully English UI while Arabic content stays RTL inside the editor thanks to <code>dir=auto</code>. No second build of the product.</span>
+          </p>
+          <div class="bi-shot">
+            <div class="bar"><span class="dots"><i></i><i></i><i></i></span><span>127.0.0.1:3737</span></div>
+            <img src="assets/shots/en-ui.png" width="840" height="470" alt="Cortex in English: LTR chrome with Arabic content kept RTL" loading="lazy" />
+          </div>
+          <div class="chips">
+            <span>LTR chrome</span>
+            <span>RTL content</span>
+            <span>dir=auto</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ SECURITY ============ -->
+  <section class="section" id="security">
+    <div class="wrap">
+      <div class="section-head" data-reveal>
+        <p class="eyebrow"><span class="idx">09</span><span class="bar"></span><span class="t-ar">الأمان</span><span class="t-en">Security</span></p>
+        <h2 class="h2">
+          <span class="t-ar">محلي أولاً.<br>بصراحة.</span>
+          <span class="t-en">Local-first.<br>Honestly.</span>
+        </h2>
+        <p class="lead">
+          <span class="t-ar">لا سحابة، ولا multi-tenant، ولا ادعاءات زائدة. هذه حماية بما يفعله النظام فعلاً.</span>
+          <span class="t-en">No cloud, no multi-tenancy, no inflated claims. This is protection based on what the system actually does.</span>
+        </p>
+      </div>
+      <div class="sec-grid">
+        <div class="sec-list">
+          <div class="sec-item" data-reveal>
+            <span class="ic"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-lock"/></svg></span>
+            <div><h3><span class="t-ar">127.0.0.1 افتراضياً</span><span class="t-en">127.0.0.1 by default</span></h3><p><span class="t-ar">يرفض الربط على الشبكة إلا بتجاوز صريح <code>CORTEX_ALLOW_REMOTE=1</code>.</span><span class="t-en">Refuses network binding unless you explicitly set <code>CORTEX_ALLOW_REMOTE=1</code>.</span></p></div>
+          </div>
+          <div class="sec-item" data-reveal style="--d:60ms">
+            <span class="ic"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-key"/></svg></span>
+            <div><h3><span class="t-ar">رمز جلسة لكل كتابة</span><span class="t-en">A session token for every write</span></h3><p><span class="t-ar">ترويسة <code>X-Cortex-Session</code> + فحص CSRF للأصل المحلي.</span><span class="t-en"><code>X-Cortex-Session</code> header + same-origin CSRF checks.</span></p></div>
+          </div>
+          <div class="sec-item" data-reveal style="--d:120ms">
+            <span class="ic"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-shield"/></svg></span>
+            <div><h3><span class="t-ar">مفاتيح مشفّرة</span><span class="t-en">Encrypted keys</span></h3><p><span class="t-ar">مفاتيح المزوّدين مشفّرة على القرص، مقنّعة في الردود، والحمولات تُفحص قبل الإرسال.</span><span class="t-en">Provider keys are encrypted at rest, masked in responses, and payloads are scanned before sending.</span></p></div>
+          </div>
+          <div class="sec-item" data-reveal style="--d:180ms">
+            <span class="ic"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-history"/></svg></span>
+            <div><h3><span class="t-ar">سجل تدقيق إلحاقي</span><span class="t-en">Append-only audit log</span></h3><p><span class="t-ar">الحذف محظور بمُشغِّل؛ كل إجراء يُسجَّل.</span><span class="t-en">Deletion is blocked by a trigger; every action is logged.</span></p></div>
+          </div>
+          <div class="sec-item" data-reveal style="--d:240ms">
+            <span class="ic"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-shield"/></svg></span>
+            <div><h3><span class="t-ar">سطح هجوم أصغر</span><span class="t-en">Smaller attack surface</span></h3><p><span class="t-ar">CSP بلا مصادر بعيدة، منع التأطير، <code>nosniff</code>، و<code>esc()</code> لكل إخراج.</span><span class="t-en">CSP with no remote sources, frame denial, <code>nosniff</code>, and <code>esc()</code> on every output.</span></p></div>
+          </div>
+        </div>
+        <aside class="hardening" data-reveal style="--d:120ms">
+          <div class="hardening-head"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-shield"/></svg><span class="t-ar">قائمة التحصين</span><span class="t-en">Hardening checklist</span><span class="tag">DEFAULTS</span></div>
+          <div class="hardening-body">
+            <div class="hardening-row"><span class="ok">✓</span><span class="k">APP_HOST</span><span class="v">=127.0.0.1</span></div>
+            <div class="hardening-row"><span class="ok">✓</span><span class="k">X-Cortex-Session</span><span class="v">required</span></div>
+            <div class="hardening-row"><span class="ok">✓</span><span class="k">CSP</span><span class="v">default-src 'self'</span></div>
+            <div class="hardening-row"><span class="ok">✓</span><span class="k">CORTEX_ALLOW_REMOTE</span><span class="v">opt-in only</span></div>
+            <div class="hardening-row"><span class="ok">✓</span><span class="k">AUDIT</span><span class="v">append-only</span></div>
+            <div class="hardening-row"><span class="ok">✓</span><span class="k">CORTEX_ALLOWED_ROOTS</span><span class="v">allowlist</span></div>
+            <div class="hardening-row"><span class="ok">✓</span><span class="k">BODY CAP</span><span class="v">2 MB</span></div>
+          </div>
+          <div class="hardening-foot">
+            <div><b>0</b><span class="t-ar">تتبّع خارجي</span><span class="t-en">trackers</span></div>
+            <div><b>0</b><span class="t-ar">حساب سحابي</span><span class="t-en">cloud accounts</span></div>
+          </div>
+          <div class="hardening-note">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-lock"/></svg>
+            <span class="t-ar">ليس متعدد المستخدمين، ولا يقدّم HTTPS. لا تعرّض 3737 مباشرة — ضعه خلف Caddy/nginx مع HTTPS ومصادقة.</span>
+            <span class="t-en">Not multi-tenant, and it doesn't serve HTTPS. Don't expose 3737 directly — put it behind Caddy/nginx with HTTPS and auth.</span>
+          </div>
+        </aside>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ QUICK START ============ -->
+  <section class="section section--soft" id="quickstart">
+    <div class="wrap">
+      <div class="section-head" data-reveal>
+        <p class="eyebrow"><span class="idx">10</span><span class="bar"></span><span class="t-ar">التشغيل</span><span class="t-en">Run</span></p>
+        <h2 class="h2"><span class="t-ar">جاهز في دقيقة.</span><span class="t-en">Ready in a minute.</span></h2>
+        <p class="lead">
+          <span class="t-ar">Node ≥ 22.5 فقط. لا <code style="font-family:var(--mono);direction:ltr">npm install</code>، ولا قاعدة بيانات خارجية.</span>
+          <span class="t-en">Node ≥ 22.5 only. No <code style="font-family:var(--mono)">npm install</code>, no external database.</span>
+        </p>
+      </div>
+      <div class="qs-grid">
+        <div>
+          <div class="qs-steps">
+            <div class="qs-step" data-reveal><span class="n">1</span><div><h3><span class="t-ar">افتح المجلد</span><span class="t-en">Open the folder</span></h3><p><code>cd cortex-v5-brain-layer/obsimem-web</code></p></div></div>
+            <div class="qs-step" data-reveal style="--d:60ms"><span class="n">2</span><div><h3><span class="t-ar">شغّل</span><span class="t-en">Start</span></h3><p><code>npm start</code></p></div></div>
+            <div class="qs-step" data-reveal style="--d:120ms"><span class="n">3</span><div><h3><span class="t-ar">افتح</span><span class="t-en">Open</span></h3><p><code>http://127.0.0.1:3737</code></p></div></div>
+            <div class="qs-step" data-reveal style="--d:180ms"><span class="n">4</span><div><h3><span class="t-ar">سطح المكتب (اختياري)</span><span class="t-en">Desktop (optional)</span></h3><p><code>npm run desktop:native</code></p></div></div>
+          </div>
+          <div class="qs-note" data-reveal>
+            <svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-spark"/></svg>
+            <span class="t-ar">للتطوير مع تحديث لحظي: <code>npm run dev</code>. للاختبارات: <code>npm test</code>.</span>
+            <span class="t-en">For live reload: <code>npm run dev</code>. For tests: <code>npm test</code>.</span>
+          </div>
+        </div>
+        <div class="terminal" data-reveal style="--d:100ms">
+          <div class="terminal-bar">
+            <span class="dots" aria-hidden="true"><i></i><i></i><i></i></span>
+            <span class="title">bash — cortex</span>
+            <button class="copy" type="button" id="copyInstall">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-copy"/></svg>
+              <span class="t-ar">نسخ</span><span class="t-en">Copy</span>
+            </button>
+          </div>
+          <div class="terminal-body" id="installCmd">
+            <div class="ln"><span class="pr">$</span> <span class="cmd">cd cortex-v5-brain-layer/obsimem-web</span></div>
+            <div class="ln"><span class="pr">$</span> <span class="cmd">npm start</span></div>
+            <div class="ln"> </div>
+            <div class="ln out">  <span class="dim">▸</span> <b>http://127.0.0.1:3737</b></div>
+            <div class="ln out">  <span class="ok">✓</span> ready <span class="dim">·</span> vault ./vault <span class="dim">·</span> ui AR / EN</div>
+          </div>
+          <div class="terminal-foot">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-check"/></svg>
+            <span class="t-ar">بلا تبعيات · يعمل على 127.0.0.1</span>
+            <span class="t-en">No dependencies · runs on 127.0.0.1</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ FAQ ============ -->
+  <section class="section" id="faq">
+    <div class="wrap">
+      <div class="section-head" data-reveal>
+        <p class="eyebrow"><span class="idx">11</span><span class="bar"></span><span class="t-ar">الأسئلة</span><span class="t-en">FAQ</span></p>
+        <h2 class="h2"><span class="t-ar">قبل أن تشغّله.</span><span class="t-en">Before you run it.</span></h2>
+      </div>
+      <div class="faq" data-reveal>
+        <details class="faq-item" open>
+          <summary><span class="q">01</span><span><span class="t-ar">هل يحتاج تثبيتاً أو تبعيات؟</span><span class="t-en">Does it need an install or dependencies?</span></span><span class="plus"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-plus"/></svg></span></summary>
+          <div class="faq-a"><span class="t-ar">لا. Node ≥ 22.5 فقط؛ <code>npm start</code> مباشرة. Electron اختياري لنافذة سطح المكتب.</span><span class="t-en">No. Node ≥ 22.5 only; run <code>npm start</code>. Electron is optional for the desktop window.</span></div>
+        </details>
+        <details class="faq-item">
+          <summary><span class="q">02</span><span><span class="t-ar">أين تُخزَّن بياناتي؟</span><span class="t-en">Where is my data stored?</span></span><span class="plus"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-plus"/></svg></span></summary>
+          <div class="faq-a"><span class="t-ar">خزنة Markdown + قاعدة SQLite داخل مجلد المشروع (أو <code>APP_ROOT</code>). لا سحابة ولا مزامنة خارجية افتراضياً.</span><span class="t-en">A Markdown vault + SQLite database inside the project folder (or <code>APP_ROOT</code>). No cloud, no external sync by default.</span></div>
+        </details>
+        <details class="faq-item">
+          <summary><span class="q">03</span><span><span class="t-ar">هل يعمل دون إنترنت؟</span><span class="t-en">Does it work offline?</span></span><span class="plus"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-plus"/></svg></span></summary>
+          <div class="faq-a"><span class="t-ar">التحرير والاسترجاع نعم. الوكيل يحتاج مزوّداً محلياً مثل Ollama، أو مزوّداً خارجياً تختاره.</span><span class="t-en">Editing and retrieval, yes. The agent needs a local provider such as Ollama, or an external provider you choose.</span></div>
+        </details>
+        <details class="faq-item">
+          <summary><span class="q">04</span><span><span class="t-ar">هل يدعم Claude Code وOpenCode؟</span><span class="t-en">Does it support Claude Code and OpenCode?</span></span><span class="plus"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-plus"/></svg></span></summary>
+          <div class="faq-a"><span class="t-ar">نعم، عبر MCP stdio أو HTTP. 28 أداة تشمل الذاكرة والوكيل وذاكرة المشروع.</span><span class="t-en">Yes, over MCP stdio or HTTP. 28 tools covering memory, the agent, and project memory.</span></div>
+        </details>
+        <details class="faq-item">
+          <summary><span class="q">05</span><span><span class="t-ar">هل الواجهة ثنائية اللغة فعلاً؟</span><span class="t-en">Is the UI really bilingual?</span></span><span class="plus"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-plus"/></svg></span></summary>
+          <div class="faq-a"><span class="t-ar">نعم — عربي/إنجليزي مع اتجاه كامل، قاموس للنصوص الديناميكية، حجم خط S/M/L/XL، ولون تمييز يُحفظ محلياً.</span><span class="t-en">Yes — Arabic/English with full direction, a dictionary for dynamic strings, S/M/L/XL font size, and an accent color saved locally.</span></div>
+        </details>
+        <details class="faq-item">
+          <summary><span class="q">06</span><span><span class="t-ar">هل هو جاهز للإنتاج؟</span><span class="t-en">Is it production-ready?</span></span><span class="plus"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-plus"/></svg></span></summary>
+          <div class="faq-a"><span class="t-ar">محلي أولاً: ليس multi-tenant ولا يقدّم HTTPS. للإنتاج، أبقه على 127.0.0.1 خلف عكس آمن مع HTTPS ومصادقة.</span><span class="t-en">Local-first: not multi-tenant and it doesn't serve HTTPS. For production, keep it on 127.0.0.1 behind a secure reverse proxy with HTTPS and auth.</span></div>
+        </details>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ CTA ============ -->
+  <section class="cta-section">
+    <div class="wrap">
+      <div class="cta" data-reveal>
+        <div>
+          <h2><span class="t-ar">معرفتك تستحق ذاكرة تعمل.</span><span class="t-en">Your knowledge deserves a memory that works.</span></h2>
+          <p><span class="t-ar">شغّله على جهازك، وابدأ بملاحظة واحدة.</span><span class="t-en">Run it on your machine and start with one note.</span></p>
+        </div>
+        <div class="cta-actions">
+          <a class="btn btn-dark" href="#quickstart"><span class="t-ar">شغّله الآن</span><span class="t-en">Run it now</span><svg class="arrow" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-arrow"/></svg></a>
+          <span class="cmd-chip"><span class="d">$</span> npm start</span>
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer class="site-footer">
+  <div class="wrap">
+    <div class="footer-grid">
+      <div class="footer-brand">
+        <a class="brand" href="#top">
+          <span class="brand-mark"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-layers"/></svg></span>
+          <span><span class="brand-name">Cortex</span><span class="brand-tag t-ar">الذاكرة الحيّة</span><span class="brand-tag t-en">The living memory</span></span>
+        </a>
+        <p><span class="t-ar">ذاكرة مشاريعك، محلياً وبإذنك. خزنة Markdown، مرآة SQLite، ووكيل يقرأ منهما.</span><span class="t-en">Your project memory, local and on your terms. A Markdown vault, a SQLite mirror, and an agent that reads both.</span></p>
+        <span class="ver">v5.0.0 · MIT</span>
+      </div>
+      <div class="footer-col">
+        <h3><span class="t-ar">المنتج</span><span class="t-en">Product</span></h3>
+        <ul>
+          <li><a href="#features"><span class="t-ar">المزايا</span><span class="t-en">Features</span></a></li>
+          <li><a href="#editor"><span class="t-ar">المحرّر</span><span class="t-en">Editor</span></a></li>
+          <li><a href="#mcp">MCP</a></li>
+          <li><a href="#security"><span class="t-ar">الأمان</span><span class="t-en">Security</span></a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h3><span class="t-ar">التشغيل</span><span class="t-en">Run</span></h3>
+        <ul>
+          <li><a href="#quickstart"><span class="t-ar">التشغيل السريع</span><span class="t-en">Quick start</span></a></li>
+          <li><a href="#bilingual"><span class="t-ar">ثنائي اللغة</span><span class="t-en">Bilingual</span></a></li>
+          <li><a href="#faq"><span class="t-ar">الأسئلة</span><span class="t-en">FAQ</span></a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h3><span class="t-ar">عن المشروع</span><span class="t-en">About</span></h3>
+        <ul>
+          <li><span class="t-ar">الإصدار 5.0.0</span><span class="t-en">Version 5.0.0</span></li>
+          <li><span class="t-ar">ترخيص MIT</span><span class="t-en">MIT license</span></li>
+          <li><span class="t-ar">Node ≥ 22.5</span><span class="t-en">Node ≥ 22.5</span></li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span>© <span id="year">2026</span> Cortex · MIT</span>
+      <div class="right">
+        <a href="#security"><span class="t-ar">الأمان</span><span class="t-en">Security</span></a>
+        <a href="#top"><span class="t-ar">إلى الأعلى ↑</span><span class="t-en">Back to top ↑</span></a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<div class="toast" id="toast" role="status" aria-live="polite"><span class="t-ar">تم النسخ</span><span class="t-en">Copied</span></div>
+
+<noscript>
+  <style>
+    [data-reveal] { opacity: 1; transform: none; }
+  </style>
+</noscript>
+
+<script src="app.js" defer></script>
+</body>
+</html>
