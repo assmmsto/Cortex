@@ -1,21 +1,28 @@
 {
   "name": "cortex",
   "version": "5.0.0",
-  "description": "Cortex — a model-native project brain with MCP memory and agent workflows.",
+  "description": "Local-first knowledge OS: a Markdown vault, structured project memory in SQLite, hybrid retrieval, and 28 MCP tools that connect any agent to your project memory.",
   "main": "electron-main.js",
   "type": "commonjs",
   "keywords": [
     "cortex",
     "mcp",
+    "model-context-protocol",
     "memory",
     "knowledge-base",
+    "second-brain",
     "notes",
     "markdown",
+    "obsidian",
     "local-first",
-    "sqlite",
+    "sqlight",
     "agent",
+    "ai-agent",
     "llm",
-    "project-memory"
+    "rag",
+    "retrieval",
+    "project-memory",
+    "privacy"
   ],
   "files": [
     "server.js",
@@ -53,15 +60,21 @@
     "node": ">=22.5"
   },
   "license": "MIT",
-  "author": "Assm Mssto",
+  "author": "ASSM MSSTO <assmmsto@users.noreply.github.com> (https://github.com/assmmsto)",
+  "contributors": [
+    {
+      "name": "ASSM MSSTO",
+      "url": "https://github.com/assmmsto"
+    }
+  ],
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/REPLACE_WITH_YOUR_USERNAME/cortex.git"
+    "url": "git+https://github.com/assmmsto/Cortex.git"
   },
   "bugs": {
-    "url": "https://github.com/REPLACE_WITH_YOUR_USERNAME/cortex/issues"
+    "url": "https://github.com/assmmsto/Cortex/issues"
   },
-  "homepage": "https://github.com/REPLACE_WITH_YOUR_USERNAME/cortex#readme",
+  "homepage": "https://assmmsto.github.io/Cortex/",
   "devDependencies": {
     "electron": "^44.9.0"
   }
